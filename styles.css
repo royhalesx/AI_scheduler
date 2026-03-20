@@ -1,0 +1,16 @@
+.main {
+    width: 10em;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.reg_font {
+    font-size: medium;
+}
+
+.content {
+    justify-self: center;
+    align-self: center;
+    margin: auto;
+}
