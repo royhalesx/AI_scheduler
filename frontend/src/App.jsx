@@ -30,15 +30,17 @@ function App() {
           <nav className="flex items-center gap-2 sm:gap-3">
             <Link
               to="/about"
-              className="h-11 cursor-pointer rounded-xl border border-border px-4 text-sm font-medium text-foreground transition-colors duration-200 hover:border-emerald-400/70 hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              className="h-11 cursor-pointer pt-2.5 rounded-xl border text-center border-border px-4 text-sm font-medium text-foreground transition-colors duration-200 hover:border-emerald-400/70 hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
               About
             </Link>
+            {/* This can be changed later but I'm intending the user to list their major and 
+            whether they're looking for easy classes or good professors etc... */}
             <button
               type="button"
               className="h-11 cursor-pointer rounded-xl bg-emerald-500 px-4 text-sm font-semibold text-emerald-950 transition-colors duration-200 hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
             >
-              List your item
+              Personal Info
             </button>
           </nav>
         </div>

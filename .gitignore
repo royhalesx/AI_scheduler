@@ -24,3 +24,6 @@ scraper/output/
 # OS
 .DS_Store
 Thumbs.db
+
+# Node Components
+frontend/node_modules
