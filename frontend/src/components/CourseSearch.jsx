@@ -1,8 +1,18 @@
 import { Search } from 'lucide-react'
+import { useEffect } from 'react'
 
-const POPULAR_SEARCHES = ['CS 235', 'ECON 110', 'MATH 112', 'IS 201', 'ACC 200']
+const POPULAR_SEARCHES = ['CS 235', 'ECON 110', 'MATH 112', 'IS 201', 'ACC 200', 
+  'Claude generates based on their previous classes and major requirements']
 
 export function CourseSearch({ courses, query, onQueryChange, onAddCourse }) {
+
+  // Maybe incorporate fuzzy search or firstname, lastname search
+  // useEffect(() =>{
+  //    if(courses.list == 0 && query.length > 0){
+  //   console.log("No match")
+  // }
+  // }, [query])
+
   return (
     <section className="rounded-2xl border border-border/90 bg-card/80 p-4 shadow-[0_0_24px_rgba(30,41,59,0.4)] backdrop-blur-sm md:p-5">
       <div className="flex items-center gap-2 rounded-xl border border-border bg-background/60 px-3 py-2 transition-all duration-200 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-400/50">
@@ -33,7 +43,7 @@ export function CourseSearch({ courses, query, onQueryChange, onAddCourse }) {
       </div>
 
       <ul className="mt-4 space-y-2">
-        {courses.length > 0 ? (
+        {courses.length > 0 && query.length > 0 ? (
           courses.map((course) => (
             <li key={course.id}>
               <button
@@ -54,11 +64,16 @@ export function CourseSearch({ courses, query, onQueryChange, onAddCourse }) {
               </button>
             </li>
           ))
+        ) : query.length > 0 ? (
+          <li className="rounded-xl border border-dashed border-border bg-background/40 p-4 text-sm text-muted-foreground">
+            No matches found, please try a different search.
+          </li>
         ) : (
           <li className="rounded-xl border border-dashed border-border bg-background/40 p-4 text-sm text-muted-foreground">
-            No matches found. Try searching by code (e.g., CS 235) or instructor.
+            Try searching for a class by code (e.g., CS 235) or a insturctor (e.g., John).
           </li>
-        )}
+        )
+        }
       </ul>
     </section>
   )

@@ -1,4 +1,5 @@
 import type { ConstraintBlock, Meeting, ScheduledCourse, Weekday } from '@/types/scheduler'
+import { fetchProfessor } from '@/lib/api'
 
 export const DAYS: Weekday[] = ['M', 'T', 'W', 'Th', 'F']
 
@@ -106,7 +107,27 @@ export function toggleConstraintBlock(
   return [...current, createConstraintBlock(day, startTime, endTime)]
 }
 
-export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
+async function getDifficulty(instructor: any): Promise<number>{
+  //estimate weekly hours based on difficulty
+  //if professor is rated a 5 start difficulty it will likely be
+  //3 hours a week per credit hour and 1 star probably half an hour
+    let data;
+   try {
+        data = await fetchProfessor(instructor)
+        console.log(data)
+      } catch {
+        data = {
+          rating: 0,
+          difficulty: 2.5,
+          wouldTakeAgain: 0,
+          numRatings: 0,
+          summary: 'No professor insights currently available.',
+        }
+      } 
+      return Number(data.difficulty);
+}
+
+export async function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): Promise<number> {
   const classHours = schedule.reduce((total, item) => {
     const minutes = item.section.meetings.reduce((sum, meeting) => {
       const range = getMeetingRange(meeting)
@@ -116,6 +137,14 @@ export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
     return total + minutes / 60
   }, 0)
 
+  // 2. Use "await" and pick a professor without deleting them
+  const instructor = schedule[0]?.section?.instructor;
+  let multiplier = instructor ? await getDifficulty(instructor): 0;
+  
+  // 3. Ensure the multiplier is at least 1
+  multiplier = instructor ? Math.max(1, multiplier) : 0;
+   
+
   const credits = schedule.reduce((sum, course) => sum + course.credits, 0)
-  return Number((classHours + credits * 2.25).toFixed(1))
+  return Number((classHours + multiplier * .6).toFixed(1))
 }

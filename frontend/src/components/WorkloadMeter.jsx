@@ -1,4 +1,4 @@
-export function WorkloadMeter({ credits, workloadHours }) {
+export function WorkloadMeter({ credits, workloadHours, loading }) {
   const intensity = Math.min(100, Math.round((workloadHours / 55) * 100))
 
   return (
@@ -20,10 +20,19 @@ export function WorkloadMeter({ credits, workloadHours }) {
           style={{ width: `${Math.max(5, intensity)}%` }}
         />
       </div>
-
-      <p className="mt-2 text-sm text-muted-foreground">
-        Workload estimate uses in-class hours plus a study heuristic of 2.25 hours per credit.
+      {loading ? 
+      (
+         <p className="mt-2 text-sm text-muted-foreground">
+        Loading estimated load
       </p>
+      )
+      : (
+         <p className="mt-2 text-sm text-muted-foreground">
+        Workload estimate uses in-class hours plus out-of-class load based on professor difficulty
+      </p>
+      )
+    }
+     
     </div>
   )
 }

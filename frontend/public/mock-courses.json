@@ -103,6 +103,34 @@
         }
       }
     },
+
+    "MATH 113": {
+      "title": "Calculus Test",
+      "credits": 4,
+      "prerequisites": ["MATH 111"],
+      "sections": {
+        "004": {
+          "crn": "22441",
+          "instructor": "Doe, John",
+          "meetings": [
+            {
+              "days": ["M", "W", "F"],
+              "startTime": "09:30",
+              "endTime": "10:45",
+              "location": "JFSB 250"
+            }
+          ],
+          "seats": { "capacity": 150, "enrolled": 142, "available": 8 },
+          "rmp": {
+            "rating": 4.1,
+            "difficulty": 3.5,
+            "wouldTakeAgain": 79,
+            "numRatings": 62,
+            "summary": "Strong conceptual explanations; pacing is quick near exam weeks."
+          }
+        }
+      }
+    },
     "ECON 110": {
       "title": "Principles of Economics",
       "credits": 3,

@@ -19,15 +19,21 @@ export function AIChatPanel({ schedule, constraints, onScheduleUpdate }) {
   }
 
   return (
-    <section className="flex h-full min-h-[26rem] flex-col rounded-2xl border border-border bg-card/80 p-4 backdrop-blur-sm">
+    <section className="flex h-full min-h-[26rem] min-w-[20rem] flex-col rounded-2xl border border-border bg-card/80 p-4 backdrop-blur-sm">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">AI Co-Pilot</p>
           <h3 className="font-mono text-lg font-semibold text-foreground">Schedule Assistant</h3>
         </div>
-        <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200">
-          Competition mode
-        </span>
+         {/* This can be changed later but I'm intending the user to list their major and 
+            whether they're looking for easy classes or good professors etc... */}
+            <button
+              type="button"
+              className="h-11 pl-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200 transition-colors duration-200 hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 cursor-pointer"
+            
+            >
+              Personal Info
+            </button>
       </div>
 
       <div className="scrollbar-thin flex-1 space-y-3 overflow-y-auto pr-1">

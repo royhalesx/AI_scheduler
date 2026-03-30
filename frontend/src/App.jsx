@@ -16,6 +16,7 @@ function App() {
     document.documentElement.classList.add('dark')
   }, [])
 
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div
@@ -34,14 +35,13 @@ function App() {
             >
               About
             </Link>
-            {/* This can be changed later but I'm intending the user to list their major and 
-            whether they're looking for easy classes or good professors etc... */}
             <button
               type="button"
               className="h-11 cursor-pointer rounded-xl bg-emerald-500 px-4 text-sm font-semibold text-emerald-950 transition-colors duration-200 hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
             >
-              Personal Info
+              Export to MyMap
             </button>
+           
           </nav>
         </div>
       </header>
@@ -55,6 +55,10 @@ function App() {
   )
 }
 
+function changeTerm(){
+  console.log("Change term to winter and recalculate data");
+}
+
 function SchedulerHome() {
   const { courses, filteredCourses, query, setQuery, loading, error, term, updatedAt, usingFallback } = useCourses()
   const [selectedCourse, setSelectedCourse] = useState(null)
@@ -65,7 +69,23 @@ function SchedulerHome() {
 
   const totalCredits = useMemo(() => schedule.reduce((sum, item) => sum + item.credits, 0), [schedule])
 
-  const workloadHours = useMemo(() => estimateWeeklyLoadHours(schedule), [schedule])
+  const [loadingWork, setLoading] = useState(false);
+  const [workloadHours, setWorkLoad] = useState();
+
+  useEffect(() => {
+  const fetchHours = async () => {
+      setLoading(true);
+      const result = await estimateWeeklyLoadHours(schedule);
+      setWorkLoad(result);
+      setLoading(false);
+    };
+
+    fetchHours();
+
+  }, [schedule])
+
+
+  // const workloadHours = useMemo(() => estimateWeeklyLoadHours(schedule), [schedule])
 
   const handleSelectSection = (course, section) => {
     setSchedule((current) => {
@@ -130,7 +150,7 @@ function SchedulerHome() {
             </h1>
             <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-lg">
               Search courses first, compare sections by professor quality, and let the assistant optimize around your
-              blocked times.
+              blocked times.{/*   Click term block to change semester? */}
             </p>
           </div>
           <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:w-auto">
@@ -169,7 +189,7 @@ function SchedulerHome() {
             onUnavailableBlocksChange={setConstraints}
           />
 
-          <WorkloadMeter credits={totalCredits} workloadHours={workloadHours} />
+          <WorkloadMeter credits={totalCredits} workloadHours={workloadHours} loading={loadingWork}/>
         </div>
 
         <div className="grid grid-cols-1 gap-6">
@@ -181,7 +201,7 @@ function SchedulerHome() {
 
           <AIChatPanel schedule={schedule} constraints={constraints} onScheduleUpdate={handleScheduleUpdate} />
 
-          <div className="rounded-2xl border border-border bg-card/70 p-4 text-sm text-muted-foreground">
+          <div className="rounded-2xl min-w-[20rem] border border-border bg-card/70 p-4 text-sm text-muted-foreground">
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-foreground">Trust &amp; Safety</p>
             <ul className="mt-2 space-y-2">
               <li className="flex items-start gap-2">

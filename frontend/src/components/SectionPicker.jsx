@@ -1,5 +1,5 @@
 import { Loader2, Users } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchProfessor } from '@/lib/api'
 import { formatTimeLabel } from '@/lib/scheduleUtils'
 import { ProfessorCard } from './ProfessorCard'
@@ -7,10 +7,16 @@ import { ProfessorCard } from './ProfessorCard'
 export function SectionPicker({ course, onSelectSection, onClose }) {
   const [selectedProfessor, setSelectedProfessor] = useState(null)
   const [loadingProfessor, setLoadingProfessor] = useState(false)
+  const [prevCourse, setPrevCourse] = useState(course);
 
   if (!course) {
     return null
   }
+  else if (course !== prevCourse) {
+    setPrevCourse(course);
+    setSelectedProfessor(null);
+  }
+
 
   const loadProfessor = async (instructor) => {
     setLoadingProfessor(true)
@@ -35,7 +41,7 @@ export function SectionPicker({ course, onSelectSection, onClose }) {
   }
 
   return (
-    <aside className="rounded-2xl border border-border bg-card/80 p-4 md:p-5">
+    <aside className="rounded-2xl min-w-[20rem] border border-border bg-card/80 p-4 md:p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">Section Picker</p>
@@ -80,7 +86,8 @@ export function SectionPicker({ course, onSelectSection, onClose }) {
             <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => loadProfessor(section.instructor)}
+                
+                onMouseOver={() => loadProfessor(section.instructor)}
                 className="cursor-pointer text-sm text-emerald-300 transition-colors duration-200 hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
               >
                 {section.instructor}
@@ -103,7 +110,7 @@ export function SectionPicker({ course, onSelectSection, onClose }) {
           <ProfessorCard professor={selectedProfessor.data} name={selectedProfessor.name} />
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-background/40 p-4 text-sm text-muted-foreground">
-            Click an instructor name to view professor insights.
+            Hover over an instructor name to view professor insights.
           </div>
         )}
       </div>
