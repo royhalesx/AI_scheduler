@@ -111,17 +111,31 @@ export function toggleConstraintBlock(
   return [...current, createConstraintBlock(day, startTime, endTime)]
 }
 
+/**
+ * Estimates weekly hours per course using:
+ *   - Actual contact hours (from meeting times)
+ *   - Study hours = credits × multiplier, where multiplier scales with RMP difficulty:
+ *       difficulty 1 (easy)   → 1.5 hrs/credit
+ *       difficulty 3 (medium) → 2.5 hrs/credit
+ *       difficulty 5 (hard)   → 3.5 hrs/credit
+ *       no RMP data           → 2.25 hrs/credit (neutral default)
+ */
 export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
-  const classHours = schedule.reduce((total, item) => {
-    const minutes = item.section.meetings.reduce((sum, meeting) => {
+  const total = schedule.reduce((sum, item) => {
+    const contactMinutes = item.section.meetings.reduce((acc, meeting) => {
       const range = getMeetingRange(meeting)
-      if (!range) return sum
-      return sum + (range.end - range.start) * meeting.days.length
+      if (!range) return acc
+      return acc + (range.end - range.start) * meeting.days.length
     }, 0)
+    const contactHours = contactMinutes / 60
 
-    return total + minutes / 60
+    const difficulty = item.section.rmp?.difficulty
+    const studyMultiplier = difficulty != null
+      ? 1.5 + (Math.min(5, Math.max(1, difficulty)) - 1) * 0.5
+      : 2.25
+
+    return sum + contactHours + item.credits * studyMultiplier
   }, 0)
 
-  const credits = schedule.reduce((sum, course) => sum + course.credits, 0)
-  return Number((classHours + credits * 2.25).toFixed(1))
+  return Number(total.toFixed(1))
 }

@@ -22,7 +22,7 @@ export function WorkloadMeter({ credits, workloadHours }) {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground">
-        Workload estimate uses in-class hours plus a study heuristic of 2.25 hours per credit.
+        Workload is estimated using data from Rate My Professor and credit count for each course.
       </p>
     </div>
   )
