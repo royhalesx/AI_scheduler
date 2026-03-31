@@ -55,7 +55,7 @@ export function CourseSearch({ courses, query, onQueryChange, onAddCourse, sched
                       <p>{course.credits} credits</p>
                       <p>{course.sections.length} sections</p>
                       {avgRating != null && (
-                        <p className="mt-0.5 inline-flex items-center gap-1 text-amber-300">
+                        <p className="mt-0.5 inline-flex items-center gap-1 text-amber-600">
                           <Star className="size-3" />
                           {avgRating.toFixed(1)}
                         </p>

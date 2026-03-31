@@ -75,6 +75,7 @@ function SchedulerHome() {
   const [constraints, setConstraints] = useState(() => loadJson('byu_constraints', []))
   const [expandedCourseId, setExpandedCourseId] = useState(null)
   const [preAiSchedule, setPreAiSchedule] = useState(null)
+  const [colorPickerOpenId, setColorPickerOpenId] = useState(null)
 
   useEffect(() => { localStorage.setItem('byu_schedule', JSON.stringify(schedule)) }, [schedule])
   useEffect(() => { localStorage.setItem('byu_constraints', JSON.stringify(constraints)) }, [constraints])
@@ -143,6 +144,11 @@ function SchedulerHome() {
       }
       return next
     })
+  }
+
+  const handleChangeCourseColor = (courseId, color) => {
+    setSchedule((current) => current.map((item) => item.courseId === courseId ? { ...item, color } : item))
+    setColorPickerOpenId(null)
   }
 
   const handleRevertSchedule = () => {
@@ -218,10 +224,18 @@ function SchedulerHome() {
                         className="group w-full flex items-center justify-between gap-2 rounded-lg border border-border bg-background/50 px-3 py-2 text-left transition-colors hover:border-byu-blue/60 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-byu-blue"
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            title="Change color"
+                            onClick={(e) => { e.stopPropagation(); setColorPickerOpenId((prev) => prev === item.courseId ? null : item.courseId) }}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); setColorPickerOpenId((prev) => prev === item.courseId ? null : item.courseId) } }}
+                            className="size-3 shrink-0 rounded-full cursor-pointer ring-1 ring-black/20 hover:ring-2 hover:ring-black/40 transition-all"
+                            style={{ backgroundColor: item.color }}
+                          />
                           <div className="min-w-0">
                             <p className="font-mono text-xs font-semibold text-foreground truncate">{item.courseId}</p>
-                            <p className="text-xs text-muted-foreground truncate">{item.credits} cr · §{item.section?.id}</p>
+                            <p className="text-xs text-muted-foreground truncate">{item.title}</p>
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
@@ -238,6 +252,21 @@ function SchedulerHome() {
                           </span>
                         </div>
                       </button>
+
+                      {colorPickerOpenId === item.courseId && (
+                        <div className="mt-1 flex flex-wrap gap-1.5 rounded-lg border border-border bg-card p-2">
+                          {BLOCK_COLORS.map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              onClick={() => handleChangeCourseColor(item.courseId, color)}
+                              className="size-5 rounded-full ring-1 ring-black/20 hover:ring-2 hover:ring-black/50 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-byu-blue"
+                              style={{ backgroundColor: color }}
+                              aria-label={`Set color to ${color}`}
+                            />
+                          ))}
+                        </div>
+                      )}
 
                       {isExpanded && course && (
                         <SectionDropdown

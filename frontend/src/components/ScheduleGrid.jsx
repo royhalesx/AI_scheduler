@@ -214,7 +214,7 @@ export function ScheduleGrid({
                           className={`pointer-events-auto absolute left-1 right-1 overflow-hidden rounded-md border p-1 shadow-md transition-colors duration-200 ${
                             hasConflict
                               ? 'border-rose-400 bg-rose-500/80 text-rose-50'
-                              : 'border-black/20 text-slate-950'
+                              : 'border-black/20 text-white'
                           }`}
                           style={{
                             top: `${position.topPct}%`,
@@ -225,6 +225,7 @@ export function ScheduleGrid({
                           <div className="flex items-start justify-between gap-1 text-[10px] leading-tight">
                             <div className="min-w-0 flex-1">
                               <p className="font-semibold">{course.courseId} §{course.section.id}</p>
+                              {course.title && <p className="truncate opacity-90">{course.title}</p>}
                               {meeting.startTime && meeting.endTime && (
                                 <p className="opacity-80">{formatTimeLabel(meeting.startTime)}–{formatTimeLabel(meeting.endTime)}</p>
                               )}
