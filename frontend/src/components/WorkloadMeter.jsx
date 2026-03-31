@@ -10,13 +10,13 @@ export function WorkloadMeter({ credits, workloadHours }) {
         </div>
         <div className="text-right">
           <p className="text-sm text-muted-foreground">Total credits</p>
-          <p className="font-mono text-xl text-emerald-300">{credits}</p>
+          <p className="font-mono text-xl text-byu-light">{credits}</p>
         </div>
       </div>
 
       <div className="h-3 overflow-hidden rounded-full bg-secondary">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-400 transition-[width] duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-byu-royal via-byu-blue to-byu-light transition-[width] duration-300"
           style={{ width: `${Math.max(5, intensity)}%` }}
         />
       </div>

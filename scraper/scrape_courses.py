@@ -115,6 +115,10 @@ def parse_time(t) -> str | None:
     if not t:
         return None
     t = str(t).strip()
+    # Bare 4-digit military time: "1200" -> "12:00", "0930" -> "09:30"
+    if re.match(r"^\d{4}$", t):
+        return f"{t[:2]}:{t[2:]}"
+    # "12:00 PM" / "9:30 AM"
     match = re.match(r"(\d{1,2}):(\d{2})\s*(AM|PM)", t, re.IGNORECASE)
     if match:
         h, m, period = int(match.group(1)), int(match.group(2)), match.group(3).upper()
@@ -123,6 +127,7 @@ def parse_time(t) -> str | None:
         elif period == "AM" and h == 12:
             h = 0
         return f"{h:02d}:{m:02d}"
+    # Already "HH:MM"
     match = re.match(r"^(\d{2}):(\d{2})$", t)
     if match:
         return t

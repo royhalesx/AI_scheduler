@@ -5,7 +5,8 @@ export const DAYS: Weekday[] = ['M', 'T', 'W', 'Th', 'F']
 export const START_MINUTES = 7 * 60
 export const END_MINUTES = 22 * 60
 
-export function timeToMinutes(time: string): number {
+export function timeToMinutes(time: string | null | undefined): number {
+  if (!time) return 0
   const [hours, minutes] = time.split(':').map(Number)
   return hours * 60 + minutes
 }
@@ -17,7 +18,8 @@ export function minutesToTime(totalMinutes: number): string {
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
 }
 
-export function formatTimeLabel(time: string): string {
+export function formatTimeLabel(time: string | null | undefined): string {
+  if (!time) return 'TBA'
   const [hoursRaw, minutes] = time.split(':')
   const hours = Number(hoursRaw)
   const period = hours >= 12 ? 'PM' : 'AM'
@@ -25,7 +27,8 @@ export function formatTimeLabel(time: string): string {
   return `${standardHours}:${minutes} ${period}`
 }
 
-export function getMeetingRange(meeting: Meeting): { start: number; end: number } {
+export function getMeetingRange(meeting: Meeting): { start: number; end: number } | null {
+  if (!meeting.startTime || !meeting.endTime) return null
   return {
     start: timeToMinutes(meeting.startTime),
     end: timeToMinutes(meeting.endTime),
@@ -46,9 +49,11 @@ export function getConflictKeys(schedule: ScheduledCourse[]): Set<string> {
 
       for (const currentMeeting of current.section.meetings) {
         const currentRange = getMeetingRange(currentMeeting)
+        if (!currentRange) continue
 
         for (const compareMeeting of compare.section.meetings) {
           const compareRange = getMeetingRange(compareMeeting)
+          if (!compareRange) continue
           const sharedDays = currentMeeting.days.filter((day) => compareMeeting.days.includes(day))
 
           if (sharedDays.length > 0 && hasOverlap(currentRange, compareRange)) {
@@ -110,6 +115,7 @@ export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
   const classHours = schedule.reduce((total, item) => {
     const minutes = item.section.meetings.reduce((sum, meeting) => {
       const range = getMeetingRange(meeting)
+      if (!range) return sum
       return sum + (range.end - range.start) * meeting.days.length
     }, 0)
 

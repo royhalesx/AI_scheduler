@@ -1,0 +1,134 @@
+{
+  "term": "Fall 2026",
+  "updatedAt": "2026-04-03T12:00:00Z",
+  "courses": {
+    "CS 235": {
+      "title": "Data Structures",
+      "credits": 3,
+      "prerequisites": ["CS 142"],
+      "sections": {
+        "001": {
+          "crn": "12345",
+          "instructor": "Smith, John",
+          "meetings": [
+            {
+              "days": ["M", "W", "F"],
+              "startTime": "10:00",
+              "endTime": "10:50",
+              "location": "TMCB 1170"
+            }
+          ],
+          "seats": { "capacity": 120, "enrolled": 98, "available": 22 },
+          "rmp": {
+            "rating": 4.2,
+            "difficulty": 3.1,
+            "wouldTakeAgain": 85,
+            "numRatings": 47,
+            "summary": "Structured lectures and fair exams; assignments are frequent but highly relevant."
+          }
+        },
+        "002": {
+          "crn": "12346",
+          "instructor": "Anderson, Leah",
+          "meetings": [
+            {
+              "days": ["T", "Th"],
+              "startTime": "13:00",
+              "endTime": "14:15",
+              "location": "TMCB 1150"
+            }
+          ],
+          "seats": { "capacity": 90, "enrolled": 83, "available": 7 },
+          "rmp": {
+            "rating": 4.6,
+            "difficulty": 2.9,
+            "wouldTakeAgain": 91,
+            "numRatings": 36,
+            "summary": "Clear lectures with practical coding examples and responsive office hours."
+          }
+        }
+      }
+    },
+    "MATH 112": {
+      "title": "Calculus 1",
+      "credits": 4,
+      "prerequisites": ["MATH 111"],
+      "sections": {
+        "004": {
+          "crn": "22441",
+          "instructor": "Chen, Amy",
+          "meetings": [
+            {
+              "days": ["M", "W", "F"],
+              "startTime": "09:00",
+              "endTime": "09:50",
+              "location": "JFSB 250"
+            }
+          ],
+          "seats": { "capacity": 150, "enrolled": 142, "available": 8 },
+          "rmp": {
+            "rating": 4.1,
+            "difficulty": 3.5,
+            "wouldTakeAgain": 79,
+            "numRatings": 62,
+            "summary": "Strong conceptual explanations; pacing is quick near exam weeks."
+          }
+        }
+      }
+    },
+    "IS 201": {
+      "title": "Introduction to Information Systems",
+      "credits": 3,
+      "prerequisites": [],
+      "sections": {
+        "001": {
+          "crn": "33102",
+          "instructor": "Hansen, Eric",
+          "meetings": [
+            {
+              "days": ["T", "Th"],
+              "startTime": "10:45",
+              "endTime": "12:00",
+              "location": "TNRB 221"
+            }
+          ],
+          "seats": { "capacity": 110, "enrolled": 94, "available": 16 },
+          "rmp": {
+            "rating": 4.7,
+            "difficulty": 2.6,
+            "wouldTakeAgain": 93,
+            "numRatings": 52,
+            "summary": "Project-focused and very practical; clear grading rubrics."
+          }
+        }
+      }
+    },
+    "ECON 110": {
+      "title": "Principles of Economics",
+      "credits": 3,
+      "prerequisites": [],
+      "sections": {
+        "009": {
+          "crn": "40177",
+          "instructor": "Park, David",
+          "meetings": [
+            {
+              "days": ["M", "W"],
+              "startTime": "14:00",
+              "endTime": "15:15",
+              "location": "KMBL 120"
+            }
+          ],
+          "seats": { "capacity": 180, "enrolled": 149, "available": 31 },
+          "rmp": {
+            "rating": 3.9,
+            "difficulty": 3.0,
+            "wouldTakeAgain": 74,
+            "numRatings": 40,
+            "summary": "Engaging examples with occasional pop quizzes; exams are moderate."
+          }
+        }
+      }
+    }
+  }
+}

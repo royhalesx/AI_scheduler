@@ -1,9 +1,10 @@
 export type Weekday = 'M' | 'T' | 'W' | 'Th' | 'F' | 'Sa'
 
 export interface RMPData {
+  rmpId?: string
   rating: number
   difficulty: number
-  wouldTakeAgain: number
+  wouldTakeAgainPercent: number
   numRatings: number
   summary?: string
 }
@@ -16,8 +17,8 @@ export interface SeatInfo {
 
 export interface Meeting {
   days: Weekday[]
-  startTime: string
-  endTime: string
+  startTime: string | null
+  endTime: string | null
   location: string
 }
 

@@ -1,77 +1,92 @@
-import { SendHorizonal } from 'lucide-react'
-import { useState } from 'react'
+import { SendHorizonal, Trash2, Undo2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@/hooks/useChat'
 
-export function AIChatPanel({ schedule, constraints, onScheduleUpdate }) {
+export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onRevertSchedule }) {
   const [message, setMessage] = useState('')
-  const { messages, sendMessage, isSending, error } = useChat(onScheduleUpdate)
+  const { messages, sendMessage, isSending, error, clearMessages } = useChat(onScheduleUpdate)
+  const scrollRef = useRef(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-
     const trimmed = message.trim()
-    if (!trimmed) {
-      return
-    }
-
+    if (!trimmed) return
     setMessage('')
-    await sendMessage(trimmed, schedule, constraints)
+    await sendMessage(trimmed, term, schedule, constraints)
   }
 
-  return (
-    <section className="flex h-full min-h-[26rem] flex-col rounded-2xl border border-border bg-card/80 p-4 backdrop-blur-sm">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">AI Co-Pilot</p>
-          <h3 className="font-mono text-lg font-semibold text-foreground">Schedule Assistant</h3>
-        </div>
-        <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200">
-          Competition mode
-        </span>
-      </div>
+  const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant')
 
-      <div className="scrollbar-thin flex-1 space-y-3 overflow-y-auto pr-1">
+  return (
+    <div className="flex h-full flex-col">
+      <div className="mb-2 flex justify-end">
+        <button
+          type="button"
+          onClick={clearMessages}
+          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-rose-400"
+          aria-label="Clear chat"
+          title="Clear chat"
+        >
+          <Trash2 className="size-3" />
+          Clear
+        </button>
+      </div>
+      <div ref={scrollRef} className="scrollbar-thin flex-1 space-y-3 overflow-y-auto pr-1">
         {messages.map((chatMessage, index) => (
           <div
             key={`${chatMessage.role}-${index}`}
-            className={chatMessage.role === 'assistant' ? 'mr-6' : 'ml-6'}
+            className={chatMessage.role === 'assistant' ? 'mr-4' : 'ml-4'}
           >
             <div
-              className={`rounded-xl p-3 text-sm leading-relaxed ${
-                chatMessage.role === 'assistant'
+              className={`rounded-xl p-3 text-sm leading-relaxed ${chatMessage.role === 'assistant'
                   ? 'border border-border bg-background/60 text-muted-foreground'
-                  : 'bg-emerald-500 text-emerald-950'
-              }`}
+                  : 'bg-byu-royal text-white'
+                }`}
             >
-              {chatMessage.content}
+              {chatMessage.content || <span className="animate-pulse text-muted-foreground/60">▍</span>}
             </div>
+            {chatMessage.role === 'assistant' && index === lastAssistantIndex && onRevertSchedule && (
+              <button
+                type="button"
+                onClick={onRevertSchedule}
+                className="mt-1 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground/60 transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <Undo2 className="size-3" />
+                Revert change
+              </button>
+            )}
           </div>
         ))}
       </div>
 
-      {error ? <p className="mt-3 text-xs text-rose-300">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
 
       <form onSubmit={handleSubmit} className="mt-3 flex items-end gap-2">
-        <label htmlFor="ai-message" className="sr-only">
-          Ask the schedule assistant
-        </label>
+        <label htmlFor="ai-message" className="sr-only">Ask the schedule assistant</label>
         <textarea
           id="ai-message"
           rows={2}
           value={message}
           onChange={(event) => setMessage(event.target.value)}
-          placeholder="Ask for lower workload, fewer gaps, or no classes before 10:00..."
-          className="min-h-11 w-full resize-none rounded-xl border border-border bg-background/70 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/50"
+          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e) } }}
+          placeholder="Ask a question"
+          className="min-h-11 w-full resize-none rounded-xl border border-border bg-background/70 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-byu-blue focus:outline-none focus:ring-2 focus:ring-byu-blue/50"
         />
         <button
           type="submit"
           disabled={isSending}
-          className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl bg-emerald-500 px-4 text-emerald-950 transition-colors duration-200 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+          className="inline-flex h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl bg-byu-royal px-4 text-white transition-colors duration-200 hover:bg-byu-blue disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-byu-blue"
           aria-label="Send message"
         >
           <SendHorizonal className={`size-4 ${isSending ? 'animate-pulse' : ''}`} />
         </button>
       </form>
-    </section>
+    </div>
   )
 }

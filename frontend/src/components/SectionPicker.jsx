@@ -45,7 +45,7 @@ export function SectionPicker({ course, onSelectSection, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="h-9 cursor-pointer rounded-lg border border-border px-3 text-sm text-foreground transition-colors duration-200 hover:border-emerald-400/70 hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+          className="h-9 cursor-pointer rounded-lg border border-border px-3 text-sm text-foreground transition-colors duration-200 hover:border-blue-400/70 hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
         >
           Close
         </button>
@@ -62,7 +62,7 @@ export function SectionPicker({ course, onSelectSection, onClose }) {
               <button
                 type="button"
                 onClick={() => onSelectSection(course, section)}
-                className="h-9 cursor-pointer rounded-lg bg-emerald-500 px-3 text-xs font-semibold text-emerald-950 transition-colors duration-200 hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+                className="h-9 cursor-pointer rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white transition-colors duration-200 hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
               >
                 Add to schedule
               </button>
@@ -81,7 +81,7 @@ export function SectionPicker({ course, onSelectSection, onClose }) {
               <button
                 type="button"
                 onClick={() => loadProfessor(section.instructor)}
-                className="cursor-pointer text-sm text-emerald-300 transition-colors duration-200 hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                className="cursor-pointer text-sm text-blue-300 transition-colors duration-200 hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
               >
                 {section.instructor}
               </button>

@@ -1,14 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-mono: 'Futura', 'Futura PT', 'Jost', ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  /* BYU brand colors */
+  --color-byu-navy: #002E5D;
+  --color-byu-royal: #0047BA;
+  --color-byu-blue: #003d99;
+  --color-byu-light: #7099c0;
+  --color-byu-orange: #D14124;
+  --color-byu-plum: #A73A64;
+  --color-byu-green: #00966C;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -43,102 +52,100 @@
 }
 
 :root {
-  --radius: 0.8rem;
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
-  --primary: #1e293b;
-  --primary-foreground: #f8fafc;
-  --secondary: #334155;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #cbd5e1;
-  --accent: #22c55e;
-  --accent-foreground: #052e16;
-  --destructive: #ef4444;
-  --border: #334155;
-  --input: #334155;
-  --ring: #22c55e;
-  --chart-1: #22c55e;
-  --chart-2: #38bdf8;
-  --chart-3: #a78bfa;
-  --chart-4: #f97316;
-  --chart-5: #facc15;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #22c55e;
-  --sidebar-primary-foreground: #052e16;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #334155;
-  --sidebar-ring: #22c55e;
+  --radius: 0.6rem;
+  --background: #ffffff;
+  --foreground: #002E5D;
+  --card: #f4f7fc;
+  --card-foreground: #002E5D;
+  --popover: #ffffff;
+  --popover-foreground: #002E5D;
+  --primary: #0047BA;
+  --primary-foreground: #ffffff;
+  --secondary: #e8eef8;
+  --secondary-foreground: #002E5D;
+  --muted: #f4f7fc;
+  --muted-foreground: #3d5a80;
+  --accent: #0047BA;
+  --accent-foreground: #ffffff;
+  --destructive: #b91c1c;
+  --border: #b8cde0;
+  --input: #b8cde0;
+  --ring: #0047BA;
+  --chart-1: #0072CE;
+  --chart-2: #BDD6E6;
+  --chart-3: #A73A64;
+  --chart-4: #D14124;
+  --chart-5: #00966C;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #002E5D;
+  --sidebar-primary: #0047BA;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8eef8;
+  --sidebar-accent-foreground: #002E5D;
+  --sidebar-border: #c5d5e8;
+  --sidebar-ring: #0072CE;
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: #1e293b;
-  --card-foreground: #f8fafc;
-  --popover: #1e293b;
-  --popover-foreground: #f8fafc;
-  --primary: #1e293b;
-  --primary-foreground: #f8fafc;
-  --secondary: #334155;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #cbd5e1;
-  --accent: #22c55e;
-  --accent-foreground: #052e16;
-  --destructive: #f87171;
-  --border: #334155;
-  --input: #334155;
-  --ring: #22c55e;
-  --chart-1: #22c55e;
-  --chart-2: #38bdf8;
-  --chart-3: #a78bfa;
-  --chart-4: #f97316;
-  --chart-5: #facc15;
-  --sidebar: #0f172a;
-  --sidebar-foreground: #f8fafc;
-  --sidebar-primary: #22c55e;
-  --sidebar-primary-foreground: #052e16;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: #334155;
-  --sidebar-ring: #22c55e;
+  --background: #05101c;
+  --foreground: #ffffff;
+  --card: #0a1e35;
+  --card-foreground: #ffffff;
+  --popover: #0a1e35;
+  --popover-foreground: #ffffff;
+  --primary: #0047BA;
+  --primary-foreground: #ffffff;
+  --secondary: #0d2847;
+  --secondary-foreground: #e8f0fb;
+  --muted: #0a1e35;
+  --muted-foreground: #8eafd0;
+  --accent: #0072CE;
+  --accent-foreground: #ffffff;
+  --destructive: #E61744;
+  --border: #1a3a5c;
+  --input: #1a3a5c;
+  --ring: #0072CE;
+  --chart-1: #0072CE;
+  --chart-2: #BDD6E6;
+  --chart-3: #A73A64;
+  --chart-4: #D14124;
+  --chart-5: #00966C;
+  --sidebar: #05101c;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #0047BA;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0d2847;
+  --sidebar-accent-foreground: #e8f0fb;
+  --sidebar-border: #1a3a5c;
+  --sidebar-ring: #0072CE;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
   }
 
   html {
-    font-family: 'Fira Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: 'Futura', 'Futura PT', 'Jost', ui-sans-serif, system-ui, sans-serif;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Fira Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: 'Futura', 'Futura PT', 'Jost', ui-sans-serif, system-ui, sans-serif;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  .font-mono {
-    font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
-    text-shadow: 0 0 10px rgba(15, 23, 42, 0.12);
+  .font-mono-code {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
 
   ::selection {
-    background: rgba(34, 197, 94, 0.32);
-    color: #f8fafc;
+    background: rgba(0, 71, 186, 0.35);
+    color: #ffffff;
   }
 
   @media (prefers-reduced-motion: reduce) {
