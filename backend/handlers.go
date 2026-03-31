@@ -140,23 +140,7 @@ func (s *appState) chat(c *gin.Context) {
 	var ragContext string
 	if hasIndex {
 		topIDs := Retrieve(queryVec, index, topK)
-
-		// Always include the student's currently scheduled courses in context,
-		// even if they weren't retrieved by semantic search.
-		idSet := make(map[string]bool, len(topIDs))
-		for _, id := range topIDs {
-			idSet[id] = true
-		}
-		var scheduledIDs []string
-		for _, item := range req.CurrentSchedule {
-			if !idSet[item.CourseID] {
-				scheduledIDs = append(scheduledIDs, item.CourseID)
-				idSet[item.CourseID] = true
-			}
-		}
-		// Put scheduled courses first so the model sees them prominently.
-		allIDs := append(scheduledIDs, topIDs...)
-		ragContext = BuildRAGContext(allIDs, termData.Courses)
+		ragContext = BuildRAGContext(topIDs, termData.Courses)
 	} else {
 		ragContext = "No embedding index available for this term."
 	}
@@ -223,7 +207,7 @@ func streamGroq(systemPrompt, userMessage string, w io.Writer) error {
 
 	reqBody := groqRequest{
 		Model:     groqModel,
-		MaxTokens: 512,
+		MaxTokens: 2048,
 		Messages: []groqMessage{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: userMessage},
