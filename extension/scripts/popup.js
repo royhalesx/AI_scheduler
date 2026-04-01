@@ -39,3 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+function downloadSchedule(){
+    console.log("download clicked!")
+}
+
+
+function applySchedule(){
+    console.log("apply Schedule")
+}
+//  DOM button 1 clicked and DOM button 2 clicked
