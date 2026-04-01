@@ -1,16 +1,31 @@
-
+<!DOCTYPE html>
 <html>
+<head>
   <link rel="stylesheet" href="styles.css">
-  <body class="main">
-    <div class="content">
-    <h1 class="reg_font">This is an AI schduler assistant for BYU</h1>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="images/BYU monogram_white@2x.png" alt="BYU Logo" class="logo">
+      <h1>AI Scheduler</h1>
+    </header>
+    
+    <main class="content">
+      <p class="subtitle">Personalized Scheduling Assistant</p>
+      
+      <div class="action-section">
+        <h3>Current Status</h3>
+        <ul id="options-list">
+          <li class="status-item"><span  id="byuConnection" class="dot red"></span> Connected to BYU Portal</li>
+          <li class="status-item"><span id="hasSavedSchedule" class="dot red"></span> Schedule Imported</li>
+        </ul>
+      </div>
 
-    <ul>
-      <li>Option 1</li>
-      <li>Option 2</li>
-      <li>Option ...</li>
-    </ul>
-    <script src="popup.js"></script>
-    </div>
-  </body>
+      <button id="main-action-btn" class="primary-btn">Export Schedule</button>
+       <button id="secondary-action-btn" class="secondary-btn">Import Schedule</button>
+    </main>
+    
+    <script src="scripts/popup.js"></script>
+  </div>
+</body>
 </html>

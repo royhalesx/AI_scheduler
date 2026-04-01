@@ -9,7 +9,7 @@
   },
   "content_scripts": [
     {
-      "js": ["scripts/content.js"],
+      "js": ["scripts/content.js", "scripts/popup.js"],
       "matches": [
         "https://commtech.byu.edu/*",
         "https://developer.chrome.com/docs/extensions/*"

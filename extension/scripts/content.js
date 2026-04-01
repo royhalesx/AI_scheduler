@@ -1,38 +1,94 @@
+let hasSavedSchedule = false;
+let byuConnection = false;
+let term = "Fall"
 
-function renderReadingTime(article) {
-console.log("You are on a byu scheduling website")
-
-if (!article) {
-    // console.log(document.body.innerText);
-    return;
-  }else if (article.innerText != null){
-    article.forEach(element => {
-        console.log(element.innerText)
-    });
-    console.log(article.innerHTML)
+function init() {
+  // Trigger popup if on CommTech site
+  if (window.location.href.includes("commtech")) {
+    checkForSchedule();
+    byuConnection = true;
+  } else {
+    byuConnection = false;
   }
-
-  const text = article.textContent;
-
-
-//   // Support for API reference docs
-//   const heading = article.querySelector("h1");
-//   const divider = article.querySelector("div");
-//   // Support for article docs with date
-// //   const date = article.querySelector("time")?.parentNode;
-//   
-// 
-//  (heading ?? divider).insertAdjacentElement("afterend", badge);
 }
 
-// renderReadingTime(document.querySelector("article"));
-renderReadingTime(document.getElementsByClassName("chooseASectionRoot"));
+function checkForSchedule() {
+  // Logic to determine if a schedule is available for import
+  // For now, we'll assume there is one found in local storage or session
 
-//Get the text on the page when it successfully loads
-document.addEventListener('DOMContentLoaded', () => {
-  const appElement = document.getElementById("app");
-  
-  if (appElement) {
-    renderReadingTime(appElement);
+  if (hasSavedSchedule) {
+    showImportPopup();
+  }
+}
+
+function showImportPopup() {
+  if (document.getElementById("byu-scheduler-overlay")) return;
+
+  const overlay = document.createElement("div");
+  overlay.id = "byu-scheduler-overlay";
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 46, 93, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+  `;
+
+  const box = document.createElement("div");
+  box.style.cssText = `
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    max-width: 350px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  `;
+
+  box.innerHTML = `
+    <h2 style="margin: 0 0 10px 0; color: #002E5D;">Import Schedule?</h2>
+    <p style="color: #555; font-size: 14px; line-height: 1.5;">We found an AI-generated schedule ready to go. Would you like to apply it to your current cart?</p>
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button id="import-btn" style="flex: 2; padding: 10px; background: #002E5D; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Yes, Import</button>
+      <button id="close-btn" style="flex: 1; padding: 10px; background: #eee; color: #333; border: none; border-radius: 6px; cursor: pointer;">Later</button>
+    </div>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  // Event Listeners
+  document.getElementById("import-btn").addEventListener("click", () => {
+    handleScheduleImport();
+    overlay.remove();
+  });
+
+  document.getElementById("close-btn").addEventListener("click", () => {
+    overlay.remove();
+  });
+}
+
+function handleScheduleImport() {
+  console.log("Importing schedule data to CommTech forms...");
+  // This is where you'd inject code to fill the page's inputs
+  alert("Attempting to auto-fill your schedule. Please verify before submitting!");
+}
+
+// Run on load
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  init();
+} else {
+  window.addEventListener("DOMContentLoaded", init);
+}
+
+
+// Listen for messages from the popup requesting the current status
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "getStatus") {
+    sendResponse({ byuConnection, hasSavedSchedule });
   }
 });
