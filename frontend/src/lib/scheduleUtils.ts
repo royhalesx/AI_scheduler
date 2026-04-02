@@ -1,4 +1,55 @@
-import type { ConstraintBlock, Meeting, ScheduledCourse, Weekday } from '@/types/scheduler'
+import type { ConstraintBlock, Meeting, RequirementGroup, ScheduledCourse, Weekday } from '@/types/scheduler'
+
+type ReqOption = string | { id: string; credits?: number }
+
+export function requirementOptionId(opt: ReqOption): string {
+  return typeof opt === 'string' ? opt : opt.id
+}
+
+function optionCredits(opt: ReqOption, fallback: number): number {
+  return typeof opt === 'string' ? fallback : opt.credits ?? fallback
+}
+
+/** Same completion rules as the My Progress tracker — needed for multi-course "pool" major reqs (e.g. complete 23 credits). */
+export function getRequirementProgress(req: RequirementGroup, completedCourseIds: string[]) {
+  const completedSet = new Set(completedCourseIds.map((c) => normalizeCourseId(c)))
+  const done = (courseId: string) => completedSet.has(normalizeCourseId(courseId))
+
+  const options = req.options as ReqOption[]
+
+  if (req.source === 'ge' && req.credits <= 3) {
+    const doneOpt = options.find((opt) => done(requirementOptionId(opt)))
+    return {
+      isDone: !!doneOpt,
+      doneBy: doneOpt ? requirementOptionId(doneOpt) : null,
+      completedCredits: doneOpt ? req.credits : 0,
+    }
+  }
+
+  const doneOpts = options.filter((opt) => done(requirementOptionId(opt)))
+  const fallbackCr = req.creditPerOption ?? 3
+  let sumCr = doneOpts.reduce((sum, opt) => sum + optionCredits(opt, fallbackCr), 0)
+  const reqCr = req.credits || 0
+  let isDone = false
+  if (options.length === 1 && doneOpts.length === 1) {
+    sumCr = reqCr
+    isDone = true
+  } else if (sumCr >= reqCr && reqCr > 0) {
+    isDone = true
+  } else if (reqCr === 0 && doneOpts.length > 0) {
+    isDone = true
+  }
+
+  return {
+    isDone,
+    doneBy: doneOpts.length > 0 ? doneOpts.map(requirementOptionId).join(', ') : null,
+    completedCredits: Math.min(sumCr, reqCr),
+  }
+}
+
+export function requirementOptionIds(r: RequirementGroup): string[] {
+  return r.options.map((o) => requirementOptionId(o as ReqOption))
+}
 
 export const DAYS: Weekday[] = ['M', 'T', 'W', 'Th', 'F']
 

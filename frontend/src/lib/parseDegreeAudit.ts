@@ -1,4 +1,5 @@
 import * as pdfjsLib from 'pdfjs-dist'
+import { normalizeCourseId as catalogCourseKey } from './scheduleUtils'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -42,12 +43,13 @@ const COURSE_ID_RE = /\b([A-Z][A-Z&]{0,5}(?:\s[A-Z]{1,2})?)\s{1,3}(\d{3}[A-Z]?)\
 //                      "Computer Science MINOR Requirements — Complete"
 //                      "General Education Requirements — In Progress"
 //                      "Religion Requirements — Planned"
-const SECTION_HEADER_RE = /^(?!.*(?:Hrs?\s*Requirement|Requirement\s*\d+))(.+?)\s+(?:MINOR\s+)?Requirements?\s*[—–]/i
+// Accept en dash, em dash, or ASCII hyphen-minus (BYU PDFs vary).
+const SECTION_HEADER_RE = /^(?!.*(?:Hrs?\s*Requirement|Requirement\s*\d+))(.+?)\s+(?:MINOR\s+)?Requirements?\s*[—–-]/i
 
 // Sub-requirement headers — never contain extractable course data
 // "72.5 Hrs Requirement 1 — Complete 23 Courses — ..."
 // "Requirement 2.1 — Complete 1 of 2 Courses — Complete"
-const SUB_REQ_RE = /^(?:\d+\.?\d*\s+Hrs?\s*)?(?:Requirement|Option)\s+[\d.]+(?:\s*[—–]\s*(.*))?/i
+const SUB_REQ_RE = /^(?:\d+\.?\d*\s+Hrs?\s*)?(?:Requirement|Option)\s+[\d.]+(?:\s*[—–-]\s*(.*))?/i
 
 // Lines that are instructions / footnotes — may contain course IDs incidentally
 // "Note: WRTG 312 recommended."
@@ -65,12 +67,12 @@ const CLASSES_STOP_RE = /^Classes\s*$|^(Spring|Winter|Fall|Summer)\s+(Term|Semes
 
 /**
  * BYU's PDF writes "C S" (with space) for the CS dept and "G E" for GE.
- * When the whole dept code is exactly one letter + space + one letter, merge them.
- *   "C S" → "CS"   "G E" → "GE"   "EC EN" stays   "REL A" stays
+ * Merge single-letter + single-letter depts, then normalize to match catalog keys
+ * (e.g. "EC EN 224" → "ECEN 224", "REL A 275" → "RELA 275").
  */
 function normalizeCourseId(dept: string, num: string): string {
   const d = /^[A-Z] [A-Z]$/.test(dept.trim()) ? dept.replace(/\s/, '') : dept.trim()
-  return `${d} ${num}`
+  return catalogCourseKey(`${d} ${num}`.trim())
 }
 
 function extractFirstCourse(line: string): { courseId: string; index: number; fullMatch: string } | null {

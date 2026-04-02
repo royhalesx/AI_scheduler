@@ -13,6 +13,8 @@ export function AIChatPanel({
   completedCourses = [],
   remainingMajorRequirements = [],
   remainingGERequirements = [],
+  degreeAuditLoaded = false,
+  majorSlotsTotal = 0,
 }) {
   const [message, setMessage] = useState('')
   const { messages, sendMessage, isSending, error, clearMessages } = useChat(onScheduleUpdate)
@@ -38,6 +40,8 @@ export function AIChatPanel({
       completedCourses,
       remainingMajorRequirements,
       remainingGERequirements,
+      degreeAuditLoaded,
+      majorSlotsTotal,
     )
   }
 

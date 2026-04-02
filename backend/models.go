@@ -96,7 +96,11 @@ type ChatRequest struct {
 	Constraints                 Constraints    `json:"constraints"`
 	Major                       string         `json:"major"`
 	CompletedCourses            []string       `json:"completedCourses"`
-	RemainingRequirements        []string `json:"remainingRequirements"`        // legacy: combined list
-	RemainingMajorRequirements   []string `json:"remainingMajorRequirements"` // from degree-audit major
-	RemainingGERequirements      []string `json:"remainingGERequirements"`      // static GE + religion
+	RemainingRequirements         []string       `json:"remainingRequirements"` // legacy: combined list
+	RemainingMajorRequirements  []string       `json:"remainingMajorRequirements"`
+	RemainingGERequirements     []string       `json:"remainingGERequirements"`
+	// DegreeAuditLoaded: student has uploaded a PDF so major rows exist in the tracker (may still be empty if parser failed).
+	DegreeAuditLoaded bool `json:"degreeAuditLoaded"`
+	// MajorSlotsTotal: number of major requirement rows from the audit (not GE). 0 if no audit or parser found none.
+	MajorSlotsTotal int `json:"majorSlotsTotal"`
 }

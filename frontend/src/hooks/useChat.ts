@@ -26,6 +26,8 @@ interface UseChatResult {
     completedCourses?: string[],
     remainingMajorRequirements?: string[],
     remainingGERequirements?: string[],
+    degreeAuditLoaded?: boolean,
+    majorSlotsTotal?: number,
   ) => Promise<void>
   clearMessages: () => void
 }
@@ -112,6 +114,8 @@ export function useChat(onScheduleUpdate?: (payload: ScheduleUpdatePayload) => v
     completedCourses: string[] = [],
     remainingMajorRequirements: string[] = [],
     remainingGERequirements: string[] = [],
+    degreeAuditLoaded = false,
+    majorSlotsTotal = 0,
   ): Promise<void> => {
     if (!message.trim() || isSending) {
       return
@@ -159,6 +163,8 @@ export function useChat(onScheduleUpdate?: (payload: ScheduleUpdatePayload) => v
           completedCourses,
           remainingMajorRequirements,
           remainingGERequirements,
+          degreeAuditLoaded,
+          majorSlotsTotal,
         }),
       })
 

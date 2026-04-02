@@ -9,7 +9,7 @@ import { WorkloadMeter } from '@/components/WorkloadMeter'
 import { useCourses } from '@/hooks/useCourses'
 import { GE_REQUIREMENTS } from '@/lib/geRequirements'
 import { parseDegreeAudit } from '@/lib/parseDegreeAudit'
-import { estimateWeeklyLoadHours, normalizeCourseId } from '@/lib/scheduleUtils'
+import { estimateWeeklyLoadHours, getRequirementProgress, normalizeCourseId, requirementOptionIds } from '@/lib/scheduleUtils'
 
 const BLOCK_COLORS = ['#0072CE', '#A73A64', '#D14124', '#00966C', '#9E2A2B', '#72246C', '#44693D']
 
@@ -19,6 +19,15 @@ function loadJson(key, fallback) {
     if (v) return JSON.parse(v) ?? fallback
   } catch { /* ignore */ }
   return fallback
+}
+
+function loadMajorRequirementsFromStorage() {
+  const raw = loadJson('byu_major_reqs', null)
+  if (!raw || !Array.isArray(raw)) return null
+  return raw.map((r) => ({
+    ...r,
+    options: (r.options ?? []).map((o) => (typeof o === 'string' ? o : o?.id)).filter(Boolean),
+  }))
 }
 
 export function SchedulerHome() {
@@ -44,7 +53,7 @@ export function SchedulerHome() {
   const [preAiSchedule, setPreAiSchedule] = useState(null)
   const [colorPickerOpenId, setColorPickerOpenId] = useState(null)
   const [completedCourses, setCompletedCourses] = useState(() => loadJson('byu_completed', []))
-  const [majorRequirements, setMajorRequirements] = useState(() => loadJson('byu_major_reqs', null))
+  const [majorRequirements, setMajorRequirements] = useState(() => loadMajorRequirementsFromStorage())
   const [majorName, setMajorName] = useState(() => localStorage.getItem('byu_major_name') ?? '')
   const [rightTab, setRightTab] = useState('ai') // 'ai' | 'tracker'
 
@@ -85,23 +94,25 @@ export function SchedulerHome() {
 
   const remainingMajorRequirements = useMemo(() => {
     return allRequirements
-      .filter(r => r.source === 'major' && !r.options.some(id => completedSet.has(id)))
-      .map((r) =>
-        r.options.length === 1
-          ? `${r.options[0]} (${r.category}, ${r.credits}cr)`
-          : `${r.label} [${r.options.join('/')}] (${r.credits}cr)`,
-      )
-  }, [allRequirements, completedSet])
+      .filter((r) => r.source === 'major' && !getRequirementProgress(r, completedCourses).isDone)
+      .map((r) => {
+        const ids = requirementOptionIds(r)
+        return ids.length === 1
+          ? `${ids[0]} (${r.category}, ${r.credits}cr)`
+          : `${r.label} [${ids.join('/')}] (${r.credits}cr)`
+      })
+  }, [allRequirements, completedCourses])
 
   const remainingGERequirements = useMemo(() => {
     return allRequirements
-      .filter(r => r.source === 'ge' && !r.options.some(id => completedSet.has(id)))
-      .map((r) =>
-        r.options.length === 1
-          ? `${r.options[0]} (${r.category}, ${r.credits}cr)`
-          : `${r.label} GE [${r.options.join('/')}] (${r.credits}cr)`,
-      )
-  }, [allRequirements, completedSet])
+      .filter((r) => r.source === 'ge' && !getRequirementProgress(r, completedCourses).isDone)
+      .map((r) => {
+        const ids = requirementOptionIds(r)
+        return ids.length === 1
+          ? `${ids[0]} (${r.category}, ${r.credits}cr)`
+          : `${r.label} GE [${ids.join('/')}] (${r.credits}cr)`
+      })
+  }, [allRequirements, completedCourses])
 
   const handleDegreeAuditUpload = async (file) => {
     try {
@@ -113,7 +124,7 @@ export function SchedulerHome() {
         category: r.category,
         credits: r.credits,
         source: 'major',
-        options: r.options,
+        options: r.options.map((o) => (typeof o === 'string' ? o : o.id)),
       })))
       if (result.completedCourses?.length > 0) {
         setCompletedCourses(prev => [...new Set([...prev, ...result.completedCourses])])
@@ -400,6 +411,8 @@ export function SchedulerHome() {
                 completedCourses={[...completedSet]}
                 remainingMajorRequirements={remainingMajorRequirements}
                 remainingGERequirements={remainingGERequirements}
+                degreeAuditLoaded={majorRequirements !== null}
+                majorSlotsTotal={majorRequirements?.length ?? 0}
               />
             ) : (
               <MajorTrackerPanel

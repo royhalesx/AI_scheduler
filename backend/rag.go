@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -293,6 +294,42 @@ func Retrieve(queryVec []float32, index EmbeddingIndex, k int) []string {
 // Build context string from retrieved courses
 // ---------------------------------------------------------------------------
 
+// normalizeCourseCatalogKey matches frontend scheduleUtils.normalizeCourseId: collapse spaces
+// in the department prefix so degree-audit text "EC EN 224" resolves to catalog key "ECEN 224".
+var courseCatalogKeyRE = regexp.MustCompile(`(?i)^([A-Za-z &]+?)(\s+\d.*)$`)
+
+func normalizeCourseCatalogKey(id string) string {
+	id = strings.TrimSpace(id)
+	m := courseCatalogKeyRE.FindStringSubmatch(id)
+	if len(m) != 3 {
+		return id
+	}
+	var dept strings.Builder
+	for _, r := range m[1] {
+		if r != ' ' && r != '\t' {
+			dept.WriteRune(r)
+		}
+	}
+	return dept.String() + m[2]
+}
+
+func resolveCourseKey(courses map[string]Course, raw string) (canonical string, course Course, ok bool) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return "", Course{}, false
+	}
+	if c, hit := courses[raw]; hit {
+		return raw, c, true
+	}
+	norm := normalizeCourseCatalogKey(raw)
+	if norm != raw {
+		if c, hit := courses[norm]; hit {
+			return norm, c, true
+		}
+	}
+	return "", Course{}, false
+}
+
 // BuildRAGContext formats retrieved courses as a structured context block for the prompt.
 func BuildRAGContext(courseIDs []string, courses map[string]Course) string {
 	return BuildRAGContextWithPinned(nil, courseIDs, courses)
@@ -306,12 +343,12 @@ func BuildRAGContextWithPinned(pinnedIDs []string, ragIDs []string, courses map[
 
 	seen := make(map[string]bool)
 
-	writeID := func(id string) {
-		if seen[id] {
+	writeID := func(raw string) {
+		id, course, hit := resolveCourseKey(courses, raw)
+		if !hit {
 			return
 		}
-		course, ok := courses[id]
-		if !ok {
+		if seen[id] {
 			return
 		}
 		seen[id] = true

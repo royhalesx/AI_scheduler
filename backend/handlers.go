@@ -288,7 +288,7 @@ func (s *appState) chat(c *gin.Context) {
 	// Extract course IDs from remaining requirements to pin in RAG context.
 	// Single-option entries: e.g. "CS 235 (Major, 3cr)" → pin "CS 235"
 	// Multi-option GE entries: e.g. "... GE [ART 101/MUSIC 101/...] (3cr)" → pin first 3 options
-	const maxPinnedReqs = 20
+	const maxPinnedReqs = 36
 	pinnedReqCount := 0
 	for _, remaining := range reqsToPin {
 		if pinnedReqCount >= maxPinnedReqs {
@@ -347,15 +347,22 @@ func (s *appState) chat(c *gin.Context) {
 	}
 	var progressBlock string
 	if hasSplit {
-		reqMajor := "None on file — load a degree audit under My Progress for major-specific requirements."
-		if len(req.RemainingMajorRequirements) > 0 {
+		var reqMajor string
+		switch {
+		case len(req.RemainingMajorRequirements) > 0:
 			reqMajor = strings.Join(req.RemainingMajorRequirements, ", ")
+		case !req.DegreeAuditLoaded:
+			reqMajor = "UNKNOWN — no degree audit loaded in My Progress. The app only has the static GE checklist plus schedule. Do **not** say the student has finished their major or that only GE is left; you cannot see their major rules until they upload an official degree audit PDF."
+		case req.MajorSlotsTotal == 0:
+			reqMajor = "UNKNOWN — a degree audit was uploaded but **zero major requirement rows** were stored (parsing may have missed Computer Engineering / major rules). Do **not** conclude the major is complete; tell them to check the official BYU degree audit and consider re-uploading the PDF."
+		default:
+			reqMajor = fmt.Sprintf("Tracker shows **no remaining major lines** among the %d major slots loaded from their audit (all marked satisfied here). This is **not** proof the degree or major is finished — BYU's official audit is the source of truth; this app can be wrong or incomplete.", req.MajorSlotsTotal)
 		}
 		reqGE := "None remaining."
 		if len(req.RemainingGERequirements) > 0 {
 			reqGE = strings.Join(req.RemainingGERequirements, ", ")
 		}
-		progressBlock = "Remaining MAJOR requirements (degree audit — NOT GE):\n" + reqMajor +
+		progressBlock = "Remaining MAJOR requirements (From My Progress degree audit — NOT GE):\n" + reqMajor +
 			"\n\nRemaining GE / religion / university breadths:\n" + reqGE
 	} else if len(req.RemainingRequirements) > 0 {
 		progressBlock = "Still needed for graduation (combined — use each line's category to tell Major vs Religion vs GE):\n" +
@@ -377,9 +384,16 @@ func (s *appState) chat(c *gin.Context) {
 		}
 	}
 
+	auditMeta := fmt.Sprintf(
+		"Degree audit PDF loaded in this app: %t. Major checklist rows stored from that audit: %d (GE rows are separate).",
+		req.DegreeAuditLoaded,
+		req.MajorSlotsTotal,
+	)
+
 	userMessage := fmt.Sprintf(`Student question: %s
 
 Major (declared): %s
+%s
 Completed courses: %s
 
 %s
@@ -398,6 +412,7 @@ Use ONLY the course data in the RETRIEVED COURSE CONTEXT below for specific fact
 %s`,
 		req.Message,
 		major,
+		auditMeta,
 		completedStr,
 		progressBlock,
 		string(scheduleJSON),

@@ -1,5 +1,6 @@
 import { CheckCircle2, ChevronDown, Circle, Plus, Upload, Loader2, HelpCircle, X } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { getRequirementProgress, requirementOptionId } from '@/lib/scheduleUtils'
 
 export function MajorTrackerPanel({
   requirements = [],
@@ -44,43 +45,8 @@ export function MajorTrackerPanel({
     }
   }
 
-  const completedSet = new Set(completedCourses)
-
-  const getOptionId = (opt) => typeof opt === 'string' ? opt : opt.id
-  const getOptionCredits = (opt) => typeof opt === 'string' ? 3 : opt.credits
-
-  const getReqProgress = (req) => {
-    if (req.source === 'ge' && req.credits <= 3) {
-      // Single-course GE slot — any one completed option satisfies it
-      const doneOpt = req.options.find(opt => completedSet.has(getOptionId(opt)))
-      return {
-        isDone: !!doneOpt,
-        doneBy: doneOpt ? getOptionId(doneOpt) : null,
-        completedCredits: doneOpt ? req.credits : 0
-      }
-    } else {
-      const doneOpts = req.options.filter(opt => completedSet.has(getOptionId(opt)))
-      const fallbackCr = req.creditPerOption ?? 3
-      let sumCr = doneOpts.reduce((sum, opt) => sum + (typeof opt === 'string' ? fallbackCr : getOptionCredits(opt)), 0)
-
-      const reqCr = req.credits || 0
-      let isDone = false
-      if (req.options.length === 1 && doneOpts.length === 1) {
-        sumCr = reqCr
-        isDone = true
-      } else if (sumCr >= reqCr && reqCr > 0) {
-        isDone = true
-      } else if (reqCr === 0 && doneOpts.length > 0) {
-        isDone = true
-      }
-
-      return {
-        isDone,
-        doneBy: doneOpts.length > 0 ? doneOpts.map(getOptionId).join(', ') : null,
-        completedCredits: Math.min(sumCr, reqCr)
-      }
-    }
-  }
+  const getOptionId = requirementOptionId
+  const getReqProgress = (req) => getRequirementProgress(req, completedCourses)
 
   const completedCredits = requirements.reduce((sum, r) => sum + getReqProgress(r).completedCredits, 0)
 
