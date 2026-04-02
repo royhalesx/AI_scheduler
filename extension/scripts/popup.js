@@ -1,51 +1,35 @@
-function updateStatus(byuConnection, hasSavedSchedule){
-  let byuPin;
-  let schedulePin;
-  try{
-    byuPin = document.getElementById("byuConnection");
-    schedulePin = document.getElementById("hasSavedSchedule");
-  } catch (exception){
-    console.error("Error finding DOM elements:", exception);
-    return;
-  }
-
-  console.log("Popup successfully opened and running updateStatus!");
-  
-  if(byuConnection){
-    byuPin.className = "dot green";
-  } else {
-    byuPin.className = "dot red";
-  }
-
-  if(hasSavedSchedule){
-    schedulePin.className = "dot green";
-  } else {
-    schedulePin.className = "dot red";
-  }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-  // Query the active tab to request status from the content script
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]) {
-      chrome.tabs.sendMessage(tabs[0].id, { action: "getStatus" }, (response) => {
-        if (response) {
-          updateStatus(response.byuConnection, response.hasSavedSchedule);
-        } else {
-          // Fallback if the content script isn't injected (e.g. on restricted pages)
-          updateStatus(false, false);
-        }
-      });
-    }
-  });
+    // 1. Update the status dots when the side panel opens
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {action: "getStatus"}, (response) => {
+            if (response) {
+                updateStatus('byuConnection', response.byuConnection);
+                updateStatus('hasSavedSchedule', response.hasSavedSchedule);
+            }
+        });
+    });
+
+    // 2. Button Listeners
+    document.getElementById("download-button").addEventListener("click", () => {
+        console.log("Popup: Download requested");
+        // Logic to download from your AI server
+         chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            chrome.tabs.sendMessage(tabs[0].id, {action: "downloadSchedule"});
+        });
+    });
+
+    document.getElementById("apply-button").addEventListener("click", () => {
+        console.log("Popup: Apply requested");
+        // Tell the content script to start filling in the BYU forms
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+            chrome.tabs.sendMessage(tabs[0].id, {action: "applySchedule"});
+        });
+    });
 });
 
-function downloadSchedule(){
-    console.log("download clicked!")
+function updateStatus(id, active) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.className = active ? "dot green" : "dot red";
+    }
 }
-
-
-function applySchedule(){
-    console.log("apply Schedule")
-}
-//  DOM button 1 clicked and DOM button 2 clicked

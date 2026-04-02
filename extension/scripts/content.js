@@ -1,6 +1,5 @@
 let hasSavedSchedule = false;
 let byuConnection = false;
-let term = "Fall"
 
 function init() {
   // Trigger popup if on CommTech site
@@ -10,6 +9,9 @@ function init() {
   } else {
     byuConnection = false;
   }
+
+
+
 }
 
 function checkForSchedule() {
@@ -70,13 +72,82 @@ function showImportPopup() {
   document.getElementById("close-btn").addEventListener("click", () => {
     overlay.remove();
   });
+
+
+}
+
+
+// Data state
+let classes = [];
+let term = "Fall";
+const test = true; // Toggle this for mock data
+
+// Change when deployed (e.g., "your-app-name.herokuapp.com")
+const websiteURL = "localhost";
+
+async function handleScheduleDownload() {
+  try {
+    // 1. Get the current active tab to check the URL
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    
+    if (!tab || !tab.url.includes(websiteURL)) {
+      console.warn("User is not on the AI Scheduler website.");
+      hasSavedSchedule = false;
+      updateStatusUI(); // Helper to update your red/green dots
+      return;
+    }
+
+    // 2. Attempt to fetch the schedule from your local API
+    // Note: Use the full path including protocol (http://)
+    try {
+      const response = await fetch(`http://${websiteURL}:3000/api/get/schedule`);
+      
+      if (!response.ok) throw new Error("Server error");
+
+      const data = await response.json();
+      classes = data;
+      hasSavedSchedule = true;
+      console.log("✅ Schedule downloaded successfully:", classes);
+
+    } catch (fetchError) {
+      console.error("Fetch failed:", fetchError);
+
+      // 3. Mock data fallback if 'test' is true
+      if (test) {
+        console.log("🛠️ Fetch failed, but test mode is ON. Generating mock BYU classes...");
+        classes = [
+          { 
+            catalog_number: "EC EN 360", 
+            title: "Electromagnetic Fields and Waves", 
+            instructor: "Jensen", 
+            days: "TTh", 
+            time: "11:00 AM - 12:15 PM" 
+          },
+          { 
+            catalog_number: "CS 235", 
+            title: "Data Structures", 
+            instructor: "Clement", 
+            days: "MWF", 
+            time: "1:00 PM - 1:50 PM" 
+          }
+        ];
+        hasSavedSchedule = true;
+      } else {
+        hasSavedSchedule = false;
+      }
+    }
+
+  } catch (err) {
+    console.error("Critical error in handleScheduleDownload:", err);
+    hasSavedSchedule = false;
+  }
 }
 
 function handleScheduleImport() {
   console.log("Importing schedule data to CommTech forms...");
   // This is where you'd inject code to fill the page's inputs
-  alert("Attempting to auto-fill your schedule. Please verify before submitting!");
 }
+
 
 // Run on load
 if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -91,4 +162,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "getStatus") {
     sendResponse({ byuConnection, hasSavedSchedule });
   }
+  if (request.action === "applySchedule") {
+    handleScheduleImport(); // Actually run the automation
+  }
+  if (request.action === "downloadSchedule") {
+    handleScheduleDownload(); // Actually run the automation
+  }
 });
+
+
