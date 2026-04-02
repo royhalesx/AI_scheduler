@@ -17,10 +17,10 @@ let classes = [
           },
           { 
             catalog_number: "CS 235", 
-            instructor: "Clement", 
+            instructor: "Crandall", 
             days: "MWF", 
-            start: "1p",
-            end: "1:50p"
+            start: "2p",
+            end: "3:15p"
           }
         ];
 let term = "Fall"; //fetch this too I guess
@@ -94,7 +94,7 @@ function showImportPopup() {
 
   // Event Listeners
   document.getElementById("import-btn").addEventListener("click", () => {
-    handleScheduleImport();
+    handleScheduleImport(0);
     overlay.remove();
   });
 
@@ -165,7 +165,7 @@ const waitForSelector = (selector, timeout = 5000) => {
 
 
 
-async function handleScheduleImport() {
+async function handleScheduleImport(classIndex) {
   //STEP 1: ensure the user is on the correct page if they are not on add a course redirect them
   const currentUrl = window.location.href;
   let sectionIndex = 0;
@@ -199,9 +199,12 @@ async function handleScheduleImport() {
   const currentYear = new Date().getFullYear(); // Currently 2026
   const termKeywords = ["Winter", "Spring", "Summer", "Fall"];
 
+  await new Promise(resolve => setTimeout(resolve, 500));
+  sectionIndex = 0;
 
   try {
     // 1. Find the specific dropdown trigger that contains a term name
+    let test = await waitForSelector('#searchTextInput');
     const dropdowns = document.querySelectorAll('.dropDownSelectedOption');
     const termTrigger = Array.from(dropdowns).find(el => 
       termKeywords.some(keyword => el.innerText.includes(keyword))
@@ -211,7 +214,7 @@ async function handleScheduleImport() {
       console.log("Found term dropdown. Clicking...");
       termTrigger.focus();
       termTrigger.click();
-
+      
       // 2. Wait for the list of options to appear in the DOM
       await waitForSelector('.dropDownSelectOption');
       const options = document.querySelectorAll('.dropDownSelectOption');
@@ -242,13 +245,15 @@ async function handleScheduleImport() {
   } catch (err) {
     console.error("Term/Year selection failed:", err);
   }
+  //wait for the term change to take effect
+  await new Promise(resolve => setTimeout(resolve, 300)); //TODO: Replace 
 
   try {
     // --- Step 1: Fill and Search (Existing Logic) ---
     //TODO: this doesn't work replace with a static wait timer?
     const searchInput = await waitForSelector('#searchTextInput'); 
     //TODO add a for loop to cycle through each class
-    const firstClass = classes[0].catalog_number;
+    const firstClass = classes[classIndex].catalog_number;
     
     searchInput.focus();
     searchInput.click();
@@ -308,12 +313,13 @@ async function handleScheduleImport() {
     const sections = document.querySelectorAll('.sectionDetailsRoot');
     
     // Using the first class from your data as the current target
-    const currentClass = classes[0]; 
+    const currentClass = classes[classIndex]; 
     const targetTimeString = `${currentClass.days} ${currentClass.start} - ${currentClass.end}`;
     
     let sectionFound = false;
 
     for (const section of sections) {
+      
       const columns = section.querySelectorAll('.sectionDetailsCol');
       
       // Ensure we have enough columns to check (at least 3)
@@ -339,19 +345,19 @@ async function handleScheduleImport() {
             selectBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
             selectBtn.click();
 
-            //TODO: update section index:
-            // sectionIndex = sections.at()
-
             
             sectionFound = true;
             break; 
           }
         }
       }
+      // if section not found then increase index
+      sectionIndex++;
     }
 
     if (!sectionFound) {
       console.log(`No section found for ${currentClass.instructor} at ${targetTimeString}`);
+      sectionIndex = 0;
       return;
     }
 
@@ -359,26 +365,38 @@ async function handleScheduleImport() {
     console.error("Section selection process failed:", err);
   }
 
-  //STEP 6: add to cart (not implemented yet for obvious reasons)
-  
-  try {
-      const addBtn = section.querySelector('.customButtonRoot customButtonDefault customButtonWhiteOnBlue sectionActionDialogButton');
-      
-      //TODO: check if the addBtn has add on it
-      if (addBtn[sectionIndex]) {
-        addBtn = addBtn[sectionIndex]
-        // Established click technique
+  //STEP 6: add to cart wait half a second so it pulls up because it's already loaded for some reason
+  // Wait a moment for the "Select" action's UI/modal to stabilize
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+try {
+    // 1. Fix: Join classes with dots. Search relative to the 'section' row.
+    const selection = ('.customButtonRoot.customButtonDefault.customButtonWhiteOnBlue.sectionActionDialogButton')
+    const addBtn = await waitForSelector(selection, 7000);
+    if (addBtn) {
+        console.log("Add button found inside section. Clicking...");
+        
+        // 2. Perform the established click technique
         addBtn.focus();
         addBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
         addBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
         addBtn.click();
-      }
-  } catch (err){
-    console.log("Cannot add course for whatever reason")
-  }
+        
+        console.log("✅ Course successfully added to cart!");
+    } else {
+        console.warn("Could not find the Add button in this specific section row.");
+    }
+} catch (err) {
+    console.error("Failed to add course to cart:", err);
+}
 
   //STEP 7: redirect back to schedulebuilder page and loop through the next class
-  
+  await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: Replace 
+    window.location.href = currentUrl + "register/addACourse";
+
+      if(classIndex < classes.length){
+        handleScheduleImport(classIndex++);
+      }
 }
 
 
@@ -399,7 +417,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ byuConnection, hasSavedSchedule });
   }
   if (request.action === "applySchedule") {
-    handleScheduleImport(); // Actually run the automation
+    handleScheduleImport(0); // Actually run the automation
   }
   if (request.action === "downloadSchedule") {
     handleScheduleDownload(); // Actually run the automation
