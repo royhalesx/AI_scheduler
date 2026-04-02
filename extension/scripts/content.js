@@ -9,7 +9,7 @@ const websiteURL = "localhost";
 // TODO: store this data in chrome.storage.local
 let classes = [
           { 
-            catalog_number: "C S 111", 
+            catalog_number: "CS 111", 
             instructor: "Giles", 
             days: "MW", 
             start: "8a",
@@ -120,7 +120,7 @@ async function handleScheduleDownload() {
     }
 
     try {
-      const response = await fetch(`http://${websiteURL}:8000/api/get/schedule`);
+      const response = await fetch(`http://${websiteURL}:8000/api/schedule/export`);
       
       if (!response.ok) throw new Error("Server error");
 
@@ -168,7 +168,7 @@ const waitForSelector = (selector, timeout = 5000) => {
 async function handleScheduleImport() {
   //STEP 1: ensure the user is on the correct page if they are not on add a course redirect them
   const currentUrl = window.location.href;
-
+  let sectionIndex = 0;
   // 1. Check if we are on a CommTech site
   if (!currentUrl.includes("commtech")) {
     console.log("You are not on the scheduling website.");
@@ -179,7 +179,6 @@ async function handleScheduleImport() {
   if (!currentUrl.includes("/register/addACourse")) {
     console.log("CommTech detected, but not on the registration page. Redirecting...");
     window.location.href = currentUrl + "register/addACourse";
-    return; 
   }
 
   // 3. Retrieve the data from Local Storage
@@ -199,6 +198,7 @@ async function handleScheduleImport() {
   // --- Step: Select Term and Year ---
   const currentYear = new Date().getFullYear(); // Currently 2026
   const termKeywords = ["Winter", "Spring", "Summer", "Fall"];
+
 
   try {
     // 1. Find the specific dropdown trigger that contains a term name
@@ -299,7 +299,6 @@ async function handleScheduleImport() {
   }
 
 
-
   //STEP 5: Find professor and add to cart or schedule the correct time
   //TODO: reload the classes variable from chrome storage
   // --- Step: Find and Select Specific Section ---
@@ -321,9 +320,11 @@ async function handleScheduleImport() {
       if (columns.length >= 3) {
         const instructorText = columns[0].innerText;
         const scheduleText = columns[2].innerText; // The third child
+        console.log("Instructor: " + instructorText)
+        console.log("Schedule: " + scheduleText)
 
         // 2. Verify Instructor and Time Match
-        if (instructorText.includes(currentClass.instructor) && scheduleText.includes(targetTimeString)) {
+        if (instructorText.includes(currentClass.instructor) && scheduleText.includes(currentClass.days) && scheduleText.includes(currentClass.start)&& scheduleText.includes(currentClass.end)) {
           console.log(`Match found: ${currentClass.instructor} | ${targetTimeString}`);
           
           // 3. Find the "Select" button within this specific section root
@@ -337,6 +338,10 @@ async function handleScheduleImport() {
             selectBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
             selectBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
             selectBtn.click();
+
+            //TODO: update section index:
+            // sectionIndex = sections.at()
+
             
             sectionFound = true;
             break; 
@@ -347,6 +352,7 @@ async function handleScheduleImport() {
 
     if (!sectionFound) {
       console.log(`No section found for ${currentClass.instructor} at ${targetTimeString}`);
+      return;
     }
 
   } catch (err) {
@@ -354,6 +360,24 @@ async function handleScheduleImport() {
   }
 
   //STEP 6: add to cart (not implemented yet for obvious reasons)
+  
+  try {
+      const addBtn = section.querySelector('.customButtonRoot customButtonDefault customButtonWhiteOnBlue sectionActionDialogButton');
+      
+      //TODO: check if the addBtn has add on it
+      if (addBtn[sectionIndex]) {
+        addBtn = addBtn[sectionIndex]
+        // Established click technique
+        addBtn.focus();
+        addBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        addBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        addBtn.click();
+      }
+  } catch (err){
+    console.log("Cannot add course for whatever reason")
+  }
+
+  //STEP 7: redirect back to schedulebuilder page and loop through the next class
   
 }
 
