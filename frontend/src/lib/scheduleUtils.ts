@@ -2,6 +2,14 @@ import type { ConstraintBlock, Meeting, ScheduledCourse, Weekday } from '@/types
 
 export const DAYS: Weekday[] = ['M', 'T', 'W', 'Th', 'F']
 
+// Normalize course IDs so "REL A 121" matches scraped format "RELA 121".
+// Removes spaces from the department prefix (everything before the course number).
+export function normalizeCourseId(id: string): string {
+  const m = id.trim().match(/^([A-Za-z &]+?)(\s+\d.*)$/)
+  if (!m) return id.trim()
+  return m[1].replace(/\s+/g, '') + m[2]
+}
+
 export const START_MINUTES = 7 * 60
 export const END_MINUTES = 22 * 60
 

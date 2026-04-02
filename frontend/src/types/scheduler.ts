@@ -76,3 +76,12 @@ export interface ScheduleUpdatePayload {
   }>
   removeCourseIds?: string[]
 }
+
+export interface RequirementGroup {
+  id: string        // stable key, e.g. "ge-arts", "major-CS-235"
+  label: string     // display name, e.g. "Arts", "Data Structures"
+  category: string  // section header for accordion grouping
+  credits: number
+  options: string[] // course IDs that satisfy this slot (single-element for major reqs)
+  source: 'ge' | 'major'
+}

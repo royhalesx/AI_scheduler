@@ -8,7 +8,9 @@ import { ScheduleGrid } from '@/components/ScheduleGrid'
 import { SectionDropdown } from '@/components/SectionDropdown'
 import { WorkloadMeter } from '@/components/WorkloadMeter'
 import { useCourses } from '@/hooks/useCourses'
-import { estimateWeeklyLoadHours } from '@/lib/scheduleUtils'
+import { GE_REQUIREMENTS } from '@/lib/geRequirements'
+import { parseDegreeAudit } from '@/lib/parseDegreeAudit'
+import { estimateWeeklyLoadHours, normalizeCourseId } from '@/lib/scheduleUtils'
 
 const BLOCK_COLORS = ['#0072CE', '#A73A64', '#D14124', '#00966C', '#9E2A2B', '#72246C', '#44693D']
 
@@ -79,24 +81,76 @@ function SchedulerHome() {
     setSelectedYearterm,
   } = useCourses()
 
-  const [schedule, setSchedule] = useState(() => loadJson('byu_schedule', []))
-  const [constraints, setConstraints] = useState(() => loadJson('byu_constraints', []))
+  const [schedule, setSchedule] = useState(() => loadJson(`byu_schedule_${yearterm}`, []))
+  const [constraints, setConstraints] = useState(() => loadJson(`byu_constraints_${yearterm}`, []))
   const [expandedCourseId, setExpandedCourseId] = useState(null)
   const [preAiSchedule, setPreAiSchedule] = useState(null)
   const [colorPickerOpenId, setColorPickerOpenId] = useState(null)
   const [completedCourses, setCompletedCourses] = useState(() => loadJson('byu_completed', []))
+  const [majorRequirements, setMajorRequirements] = useState(() => loadJson('byu_major_reqs', null))
+  const [majorName, setMajorName] = useState(() => localStorage.getItem('byu_major_name') ?? '')
   const [rightTab, setRightTab] = useState('ai') // 'ai' | 'tracker'
 
-  useEffect(() => { localStorage.setItem('byu_schedule', JSON.stringify(schedule)) }, [schedule])
-  useEffect(() => { localStorage.setItem('byu_constraints', JSON.stringify(constraints)) }, [constraints])
-  useEffect(() => { localStorage.setItem('byu_completed', JSON.stringify(completedCourses)) }, [completedCourses])
+  // When term changes, load that term's saved schedule and constraints
+  useEffect(() => {
+    if (!yearterm) return
+    setSchedule(loadJson(`byu_schedule_${yearterm}`, []))
+    setConstraints(loadJson(`byu_constraints_${yearterm}`, []))
+    setExpandedCourseId(null)
+    setPreAiSchedule(null)
+  }, [yearterm])
 
-  const courseMap = useMemo(() => new Map(courses.map((c) => [c.id, c])), [courses])
+  useEffect(() => {
+    if (yearterm) localStorage.setItem(`byu_schedule_${yearterm}`, JSON.stringify(schedule))
+  }, [schedule, yearterm])
+  useEffect(() => {
+    if (yearterm) localStorage.setItem(`byu_constraints_${yearterm}`, JSON.stringify(constraints))
+  }, [constraints, yearterm])
+  useEffect(() => { localStorage.setItem('byu_completed', JSON.stringify(completedCourses)) }, [completedCourses])
+  useEffect(() => { localStorage.setItem('byu_major_reqs', JSON.stringify(majorRequirements)) }, [majorRequirements])
+  useEffect(() => { localStorage.setItem('byu_major_name', majorName) }, [majorName])
+
+  const courseMap = useMemo(() => {
+    const m = new Map()
+    for (const c of courses) { m.set(c.id, c); m.set(normalizeCourseId(c.id), c) }
+    return m
+  }, [courses])
   const totalCredits = useMemo(() => schedule.reduce((sum, item) => sum + item.credits, 0), [schedule])
   const workloadHours = useMemo(() => estimateWeeklyLoadHours(schedule), [schedule])
   const scheduledCourseIds = useMemo(() => new Set(schedule.map((s) => s.courseId)), [schedule])
 
   const completedSet = useMemo(() => new Set(completedCourses), [completedCourses])
+
+  const allRequirements = useMemo(() => [
+    ...GE_REQUIREMENTS,
+    ...(majorRequirements ?? []),
+  ], [majorRequirements])
+
+  const remainingRequirements = useMemo(() => {
+    return allRequirements
+      .filter(r => !r.options.some(id => completedSet.has(id)))
+      .map(r => r.options.length === 1
+        ? `${r.options[0]} (${r.category}, ${r.credits}cr)`
+        : `${r.label} GE [${r.options.join('/')}] (${r.credits}cr)`
+      )
+  }, [allRequirements, completedSet])
+
+  const handleDegreeAuditUpload = async (file) => {
+    const result = await parseDegreeAudit(file)
+    setMajorName(result.major)
+    setMajorRequirements(result.requirements.map(r => ({
+      id: `major-${r.courseId}`,
+      label: r.title || r.courseId,
+      category: r.category,
+      credits: r.credits,
+      source: 'major',
+      options: [r.courseId],
+    })))
+    const pdfCompleted = result.requirements.filter(r => r.completed).map(r => r.courseId)
+    if (pdfCompleted.length > 0) {
+      setCompletedCourses(prev => [...new Set([...prev, ...pdfCompleted])])
+    }
+  }
 
   // Hide completed courses from search results
   const visibleCourses = useMemo(() =>
@@ -365,15 +419,29 @@ function SchedulerHome() {
                 constraints={constraints}
                 onScheduleUpdate={handleScheduleUpdate}
                 onRevertSchedule={preAiSchedule ? handleRevertSchedule : null}
+                major={majorName}
                 completedCourses={[...completedSet]}
-                remainingRequirements={[]}
+                remainingRequirements={remainingRequirements}
               />
             ) : (
               <MajorTrackerPanel
-                requirements={[]}
+                requirements={allRequirements}
+                majorLoaded={majorRequirements !== null}
                 completedCourses={completedCourses}
                 onToggleCompleted={handleToggleCompleted}
-                onAddCourse={(courseId) => { handleAddCourse(courseMap.get(courseId)); setRightTab('ai') }}
+                onAddCourse={async (courseId) => {
+                  const normalized = normalizeCourseId(courseId)
+                  let course = courseMap.get(normalized) ?? courseMap.get(courseId)
+                  if (!course) {
+                    const { fetchCourseById } = await import('@/lib/api')
+                    const terms = [yearterm, ...availableTerms.map(t => t.yearterm).filter(t => t !== yearterm)]
+                    for (const t of terms) {
+                      try { course = await fetchCourseById(normalized, t); break } catch { /* try next */ }
+                    }
+                  }
+                  if (course) handleAddCourse(course)
+                }}
+                onUploadAudit={handleDegreeAuditUpload}
               />
             )}
           </div>
