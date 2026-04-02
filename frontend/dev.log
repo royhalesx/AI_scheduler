@@ -1,0 +1,34 @@
+
+> react-template@0.0.0 dev
+> vite
+
+[2m1:17:44 PM[22m [33m[1m[vite][22m[39m [33mwarning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.[39m
+[2m1:17:44 PM[22m [33m[1m[vite][22m[39m [33mwarning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.[39m
+[33mYou or a plugin you are using have set `optimizeDeps.esbuildOptions` but this option is now deprecated. Vite now uses Rolldown to optimize the dependencies. Please use `optimizeDeps.rolldownOptions` instead.[39m
+node:internal/fs/watchers:247
+    const error = new UVException({
+                  ^
+
+Error: EISDIR: illegal operation on a directory, watch 'X:/home/jenbensen/code-stuffs/Weber/AI_scheduler/frontend/vite.config.ts'
+    at FSWatcher.<computed> (node:internal/fs/watchers:247:19)
+    at Object.watch (node:fs:2549:36)
+    at createFsWatchInstance (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:8480:16)
+    at setFsWatchListener (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:8522:14)
+    at NodeFsHandler._watchWithNodeFs (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:8636:20)
+    at NodeFsHandler._handleFile (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:8680:24)
+    at NodeFsHandler._addToNodeFs (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:8854:26)
+    at async file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:9494:18
+    at async Promise.all (index 1)
+Emitted 'error' event on FSWatcher instance at:
+    at FSWatcher._handleError (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:9653:146)
+    at NodeFsHandler._addToNodeFs (file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:8859:18)
+    at async file:///C:/Users/jenbe/AppData/Roaming/npm/node_modules/vite/dist/node/chunks/node.js:9494:18
+    at async Promise.all (index 1) {
+  errno: -4068,
+  syscall: 'watch',
+  code: 'EISDIR',
+  path: 'X:/home/jenbensen/code-stuffs/Weber/AI_scheduler/frontend/vite.config.ts',
+  filename: 'X:/home/jenbensen/code-stuffs/Weber/AI_scheduler/frontend/vite.config.ts'
+}
+
+Node.js v22.17.0

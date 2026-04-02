@@ -114,6 +114,9 @@ export default defineConfig({
   server: {
     // Allow requests from any host (needed for E2B sandbox preview)
     allowedHosts: true,
+    watch: {
+      usePolling: true
+    },
     // Prevent browser from caching dev server responses across code generations.
     // Without this, the iframe reloads the HTML (cache-busted via ?_cb=) but the
     // entry-point scripts (e.g. /src/main.jsx) are served from HTTP cache with

@@ -5,18 +5,24 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString()
 
+export interface ParsedRequirementOption {
+  id: string
+  credits: number
+}
+
 export interface ParsedRequirement {
-  courseId: string   // e.g. "CS 235"
-  title: string      // e.g. "Data Structures"
-  credits: number    // e.g. 3
-  category: string   // e.g. "Computer Engineering (BS)"
-  completed: boolean // true if a final grade exists in the PDF
+  id: string
+  label: string
+  category: string
+  credits: number
+  options: ParsedRequirementOption[]
 }
 
 export interface ParsedDegreeAudit {
   major: string
   totalCredits: number
   requirements: ParsedRequirement[]
+  completedCourses: string[]
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -36,12 +42,12 @@ const COURSE_ID_RE = /\b([A-Z][A-Z&]{0,5}(?:\s[A-Z]{1,2})?)\s{1,3}(\d{3}[A-Z]?)\
 //                      "Computer Science MINOR Requirements — Complete"
 //                      "General Education Requirements — In Progress"
 //                      "Religion Requirements — Planned"
-const SECTION_HEADER_RE = /^(.+?)\s+(?:MINOR\s+)?Requirements?\s*[—–]/i
+const SECTION_HEADER_RE = /^(?!.*(?:Hrs?\s*Requirement|Requirement\s*\d+))(.+?)\s+(?:MINOR\s+)?Requirements?\s*[—–]/i
 
 // Sub-requirement headers — never contain extractable course data
 // "72.5 Hrs Requirement 1 — Complete 23 Courses — ..."
 // "Requirement 2.1 — Complete 1 of 2 Courses — Complete"
-const SUB_REQ_RE = /^(?:\d+\.?\d*\s+Hrs?\s+)?Requirement\s+[\d.]+\s*[—–]/i
+const SUB_REQ_RE = /^(?:\d+\.?\d*\s+Hrs?\s*)?(?:Requirement|Option)\s+[\d.]+(?:\s*[—–]\s*(.*))?/i
 
 // Lines that are instructions / footnotes — may contain course IDs incidentally
 // "Note: WRTG 312 recommended."
@@ -49,8 +55,7 @@ const SUB_REQ_RE = /^(?:\d+\.?\d*\s+Hrs?\s+)?Requirement\s+[\d.]+\s*[—–]/i
 // "Complete at least 12 credit hours of TECHNICAL ELECTIVES..."
 // "Courses used to fulfill Requirement 3 cannot be used..."
 // "This course is no longer available for registration..."
-// "Option 2.1 — Complete up to 6 hours"
-const NOTE_LINE_RE = /^(Note:|You may take|Complete at least|Complete a total|Courses used|Option \d|Technical Electives?:|no longer available|possible substitutions|Obtain confirmation|Earn at least|This course is)/i
+const NOTE_LINE_RE = /^(Note:|You may take|Complete at least|Complete a total|Courses used|Technical Electives?:|no longer available|possible substitutions|Obtain confirmation|Earn at least|This course is)/i
 
 // The "Classes" section (semester-by-semester history) starts with one of these.
 // Once seen, we stop — everything after is already-taken class history, not requirements.
@@ -135,11 +140,14 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
   // ── Section-by-section parsing ──────────────────────────────────────────
 
   const requirements: ParsedRequirement[] = []
+  const completedCourses = new Set<string>()
   const seen = new Set<string>()
 
   // Track state as we walk through lines
   let currentCategory = ''        // current requirements section name
   let inRequirementsSection = false
+  let currentGroup: ParsedRequirement | null = null
+  let reqIdCounter = 0
 
   for (const line of allLines) {
     const trimmed = line.trim()
@@ -156,16 +164,37 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
         .trim()
       if (/MINOR/i.test(trimmed)) cat += ' (Minor)'
       currentCategory = cat
-      inRequirementsSection = true
+      inRequirementsSection = !/General Education/i.test(cat)
+      currentGroup = null
       continue
     }
 
     // Only parse courses once we're inside a requirements section
     if (!inRequirementsSection) continue
 
+    // ── Sub-Requirement Header ─────────────────────────────────────────
+    const subReqMatch = trimmed.match(SUB_REQ_RE)
+    if (subReqMatch) {
+      let reqCredits = 3
+      const hrsMatch = trimmed.match(/^(\d+\.?\d*)\s+Hrs/i)
+      if (hrsMatch) {
+        reqCredits = parseFloat(hrsMatch[1])
+      }
+      
+      const labelText = trimmed.replace(/\s+—\s+\(Completed.*$/, '').replace(/\s+—\s+Complete\s*$/, '').trim()
+      
+      currentGroup = {
+        id: `major-req-${++reqIdCounter}`,
+        label: labelText,
+        category: currentCategory || 'Requirements',
+        credits: reqCredits,
+        options: []
+      }
+      requirements.push(currentGroup)
+      continue
+    }
+
     // ── Skip structural / annotation lines ─────────────────────────────
-    // Sub-requirement headers ("Requirement 1 —", "72.5 Hrs Requirement 2 —")
-    if (SUB_REQ_RE.test(trimmed)) continue
     // Notes, instructions, footnotes
     if (NOTE_LINE_RE.test(trimmed)) continue
     // Lines that are pure status words (column values with no other info)
@@ -179,19 +208,21 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
 
     const { courseId, index, fullMatch } = match
 
-    // Skip if already captured (same course can appear in multiple sections)
-    if (seen.has(courseId)) continue
-    seen.add(courseId)
-
-    // ── Completion: line has a final grade letter ───────────────────────
-    const completed = COMPLETED_GRADE_RE.test(line)
-
     // ── Credits: first decimal number after the course ID ──────────────
     // Using a decimal (e.g. "3.0") avoids false hits on title words like
     // "Capstone Design 1" before the real credits "3.0".
     const afterId = line.slice(index + fullMatch.length)
     const creditsMatch = afterId.match(/\b(\d+\.\d+)\b/)
     const credits = creditsMatch ? parseFloat(creditsMatch[1]) : 3
+
+    // ── Completion: line has a final grade letter or 'In Progress' ──────────────
+    if (COMPLETED_GRADE_RE.test(afterId) || /In Progress/i.test(afterId)) {
+      completedCourses.add(courseId)
+    }
+
+    // Skip if already captured (same course can appear in multiple sections)
+    if (seen.has(courseId)) continue
+    seen.add(courseId)
 
     // ── Title: text between course ID and first decimal / grade / semester
     let title = afterId
@@ -205,14 +236,21 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
 
     if (!title) title = courseId
 
-    requirements.push({
-      courseId,
-      title,
-      credits,
-      category: currentCategory || 'Requirements',
-      completed,
-    })
+    if (currentGroup) {
+      currentGroup.options.push({ id: courseId, credits })
+    } else {
+      requirements.push({
+        id: `major-req-${++reqIdCounter}`,
+        label: title || courseId,
+        category: currentCategory || 'Requirements',
+        credits,
+        options: [{ id: courseId, credits }]
+      })
+    }
   }
 
-  return { major, totalCredits, requirements }
+  // Filter out any groups that ended up with 0 options
+  const validRequirements = requirements.filter(r => r.options.length > 0)
+
+  return { major, totalCredits, requirements: validRequirements, completedCourses: [...completedCourses] }
 }

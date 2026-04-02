@@ -44,12 +44,41 @@ export function MajorTrackerPanel({
 
   const completedSet = new Set(completedCourses)
 
-  const isReqSatisfied = (req) => req.options.some(id => completedSet.has(id))
-  const satisfiedBy = (req) => req.options.find(id => completedSet.has(id)) ?? null
+  const getOptionId = (opt) => typeof opt === 'string' ? opt : opt.id
+  const getOptionCredits = (opt) => typeof opt === 'string' ? 3 : opt.credits
 
-  const completedCredits = requirements
-    .filter(r => isReqSatisfied(r))
-    .reduce((sum, r) => sum + r.credits, 0)
+  const getReqProgress = (req) => {
+    if (req.source === 'ge') {
+      const doneOpt = req.options.find(opt => completedSet.has(getOptionId(opt)))
+      return {
+        isDone: !!doneOpt,
+        doneBy: doneOpt ? getOptionId(doneOpt) : null,
+        completedCredits: doneOpt ? req.credits : 0
+      }
+    } else {
+      const doneOpts = req.options.filter(opt => completedSet.has(getOptionId(opt)))
+      let sumCr = doneOpts.reduce((sum, opt) => sum + getOptionCredits(opt), 0)
+      
+      const reqCr = req.credits || 0
+      let isDone = false
+      if (req.options.length === 1 && doneOpts.length === 1) {
+        sumCr = reqCr
+        isDone = true
+      } else if (sumCr >= reqCr && reqCr > 0) {
+        isDone = true
+      } else if (reqCr === 0 && doneOpts.length > 0) {
+        isDone = true
+      }
+
+      return {
+        isDone,
+        doneBy: doneOpts.length > 0 ? doneOpts.map(getOptionId).join(', ') : null,
+        completedCredits: Math.min(sumCr, reqCr)
+      }
+    }
+  }
+
+  const completedCredits = requirements.reduce((sum, r) => sum + getReqProgress(r).completedCredits, 0)
 
   const totalCredits = requirements.reduce((sum, r) => sum + r.credits, 0)
   const progressPct = totalCredits > 0 ? Math.min(100, Math.round((completedCredits / totalCredits) * 100)) : 0
@@ -106,7 +135,7 @@ export function MajorTrackerPanel({
         {categories.map(category => {
           const reqs = requirements.filter(r => r.category === category)
           const isOpen = openCategories.has(category)
-          const catCompleted = reqs.filter(r => isReqSatisfied(r)).length
+          const catCompleted = reqs.filter(r => getReqProgress(r).isDone).length
 
           return (
             <div key={category} className="rounded-xl border border-border overflow-hidden">
@@ -125,9 +154,8 @@ export function MajorTrackerPanel({
               {isOpen && (
                 <ul className="divide-y divide-border/50">
                   {reqs.map(req => {
-                    const isDone = isReqSatisfied(req)
-                    const doneBy = satisfiedBy(req)
-                    const isGE = req.options.length > 1
+                    const { isDone, doneBy, completedCredits: rcCr } = getReqProgress(req)
+                    const isGrouped = req.options.length > 1
                     const optionsExpanded = expandedOptions.has(req.id)
 
                     return (
@@ -137,18 +165,18 @@ export function MajorTrackerPanel({
                           <button
                             type="button"
                             onClick={() => {
-                              if (isGE) {
-                                if (doneBy) {
+                              if (isGrouped) {
+                                if (isDone && req.source === 'ge') {
                                   onToggleCompleted(doneBy)
                                 } else {
                                   toggleOptions(req.id)
                                 }
                               } else {
-                                onToggleCompleted(req.options[0])
+                                onToggleCompleted(getOptionId(req.options[0]))
                               }
                             }}
                             className="shrink-0 text-muted-foreground hover:text-byu-royal transition-colors"
-                            aria-label={isDone ? 'Mark incomplete' : isGE ? 'Show options' : 'Mark complete'}
+                            aria-label={isDone ? 'Mark incomplete' : isGrouped ? 'Show options' : 'Mark complete'}
                           >
                             {isDone
                               ? <CheckCircle2 className="size-4 text-green-600" />
@@ -157,7 +185,7 @@ export function MajorTrackerPanel({
                           </button>
 
                           <div className="min-w-0 flex-1">
-                            {isGE ? (
+                            {isGrouped ? (
                               <>
                                 <p className={`text-xs font-semibold ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                                   {req.label}
@@ -168,17 +196,17 @@ export function MajorTrackerPanel({
                                   className={`text-xs transition-colors ${isDone ? 'text-green-600 hover:text-green-500' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                   {isDone
-                                    ? (optionsExpanded ? 'Hide ▴' : `Satisfied by ${doneBy} ▾`)
-                                    : (optionsExpanded ? 'Hide options ▴' : `${req.options.length} options ▾`)
+                                    ? (optionsExpanded ? 'Hide ▴' : (req.source === 'major' ? `${rcCr}/${req.credits}cr satisfied ▾` : `Satisfied by ${doneBy} ▾`))
+                                    : (optionsExpanded ? 'Hide options ▴' : (req.source === 'major' ? `${rcCr}/${req.credits}cr satisfied ▾` : `${req.options.length} options ▾`))
                                   }
                                 </button>
                               </>
                             ) : (
                               <>
                                 <p className={`text-xs font-semibold ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                                  {req.options[0]}
+                                  {getOptionId(req.options[0])}
                                 </p>
-                                {req.label && req.label !== req.options[0] && (
+                                {req.label && req.label !== getOptionId(req.options[0]) && (
                                   <p className="truncate text-xs text-muted-foreground">{req.label}</p>
                                 )}
                               </>
@@ -187,23 +215,24 @@ export function MajorTrackerPanel({
 
                           <span className="shrink-0 text-xs text-muted-foreground">{req.credits}cr</span>
 
-                          {/* Add to schedule — only for major reqs (single option) that aren't done */}
-                          {!isDone && !isGE && onAddCourse && (
+                          {/* Add to schedule — only for single option reqs that aren't done */}
+                          {!isDone && !isGrouped && onAddCourse && (
                             <button
                               type="button"
-                              onClick={() => onAddCourse(req.options[0])}
+                              onClick={() => onAddCourse(getOptionId(req.options[0]))}
                               className="shrink-0 inline-flex size-6 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-byu-royal hover:text-byu-royal transition-colors"
-                              title={`Add ${req.options[0]} to schedule`}
+                              title={`Add ${getOptionId(req.options[0])} to schedule`}
                             >
                               <Plus className="size-3.5" />
                             </button>
                           )}
                         </div>
 
-                        {/* Expandable options list for GE reqs */}
-                        {isGE && optionsExpanded && (
+                        {/* Expandable options list for grouped reqs */}
+                        {isGrouped && optionsExpanded && (
                           <ul className="mt-1.5 ml-6 space-y-0.5">
-                            {req.options.map(opt => {
+                            {req.options.map(optObj => {
+                              const opt = getOptionId(optObj)
                               const optDone = completedSet.has(opt)
                               return (
                                 <li key={opt} className="flex items-center gap-1.5">

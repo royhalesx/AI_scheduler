@@ -1,0 +1,209 @@
+npm verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+npm info using npm@10.9.2
+npm info using node@v22.17.0
+npm verbose title npm install
+npm verbose argv "install" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:C:\Users\jenbe\AppData\Local\npm-cache\_logs\2026-04-02T19_13_40_873Z-
+npm verbose logfile C:\Users\jenbe\AppData\Local\npm-cache\_logs\2026-04-02T19_13_40_873Z-debug-0.log
+npm verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-wasm32-wasi
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-win32-arm64-msvc
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-linux-arm64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-linux-arm64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-linux-arm-gnueabihf
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-freebsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-darwin-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-darwin-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\lightningcss-android-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\fsevents
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-win32-arm64-msvc
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-linux-arm64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-linux-arm64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-linux-arm-gnueabihf
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-freebsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-darwin-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-darwin-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@tailwindcss\oxide-android-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-win32-ia32-msvc
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-win32-arm64-msvc
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-openharmony-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-openbsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-s390x-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-riscv64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-riscv64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-ppc64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-ppc64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-loong64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-loong64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-arm64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-arm64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-arm-musleabihf
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-linux-arm-gnueabihf
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-freebsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-freebsd-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-darwin-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-darwin-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-android-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@rollup\rollup-android-arm-eabi
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-win32-arm64-msvc
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-linux-riscv64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-linux-arm64-musl
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-linux-arm64-gnu
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-linux-arm-gnueabihf
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-darwin-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-darwin-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@napi-rs\canvas-android-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\win32-ia32
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\win32-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\sunos-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\openharmony-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\openbsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\openbsd-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\netbsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\netbsd-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-s390x
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-riscv64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-ppc64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-mips64el
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-loong64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-ia32
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\linux-arm
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\freebsd-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\freebsd-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\darwin-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\darwin-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\android-x64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\android-arm64
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\android-arm
+npm verbose reify failed optional dependency X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\@esbuild\aix-ppc64
+npm http cache @tailwindcss/oxide-win32-x64-msvc@https://registry.npmjs.org/@tailwindcss/oxide-win32-x64-msvc/-/oxide-win32-x64-msvc-4.2.2.tgz 0ms (cache hit)
+npm http cache lightningcss-win32-x64-msvc@https://registry.npmjs.org/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.32.0.tgz 0ms (cache hit)
+npm http cache @rollup/rollup-win32-x64-msvc@https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.60.0.tgz 0ms (cache hit)
+npm http cache @napi-rs/canvas-win32-x64-msvc@https://registry.npmjs.org/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-0.1.97.tgz 0ms (cache hit)
+npm http cache @esbuild/win32-x64@https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.27.4.tgz 0ms (cache hit)
+npm http cache @rollup/rollup-win32-x64-gnu@https://registry.npmjs.org/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.60.0.tgz 0ms (cache hit)
+npm http cache @babel/parser@https://registry.npmjs.org/@babel/parser/-/parser-7.29.2.tgz 0ms (cache hit)
+npm http cache update-browserslist-db@https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.2.3.tgz 0ms (cache hit)
+npm http cache pnpm@https://registry.npmjs.org/pnpm/-/pnpm-10.33.0.tgz 0ms (cache hit)
+npm http cache acorn@https://registry.npmjs.org/acorn/-/acorn-8.16.0.tgz 0ms (cache hit)
+npm http cache which@https://registry.npmjs.org/which/-/which-2.0.2.tgz 0ms (cache hit)
+npm http cache js-yaml@https://registry.npmjs.org/js-yaml/-/js-yaml-4.1.1.tgz 0ms (cache hit)
+npm http cache baseline-browser-mapping@https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.10.12.tgz 0ms (cache hit)
+npm http cache nanoid@https://registry.npmjs.org/nanoid/-/nanoid-3.3.11.tgz 0ms (cache hit)
+npm http cache vite@https://registry.npmjs.org/vite/-/vite-7.3.1.tgz 0ms (cache hit)
+npm http cache json5@https://registry.npmjs.org/json5/-/json5-2.2.3.tgz 0ms (cache hit)
+npm http cache semver@https://registry.npmjs.org/semver/-/semver-6.3.1.tgz 0ms (cache hit)
+npm http cache jsesc@https://registry.npmjs.org/jsesc/-/jsesc-3.1.0.tgz 0ms (cache hit)
+npm http cache jiti@https://registry.npmjs.org/jiti/-/jiti-2.6.1.tgz 0ms (cache hit)
+npm http cache eslint@https://registry.npmjs.org/eslint/-/eslint-9.39.4.tgz 0ms (cache hit)
+npm http cache rollup@https://registry.npmjs.org/rollup/-/rollup-4.60.0.tgz 0ms (cache hit)
+npm http cache browserslist@https://registry.npmjs.org/browserslist/-/browserslist-4.28.1.tgz 0ms (cache hit)
+npm http cache typescript@https://registry.npmjs.org/typescript/-/typescript-5.8.3.tgz 0ms (cache hit)
+npm http cache loose-envify@https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz 0ms (cache hit)
+npm http cache esbuild@https://registry.npmjs.org/esbuild/-/esbuild-0.27.4.tgz 0ms (cache hit)
+npm http cache semver@https://registry.npmjs.org/semver/-/semver-7.7.4.tgz 0ms (cache hit)
+npm http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 328ms
+npm http fetch GET 200 https://registry.npmjs.org/which/-/which-2.0.2.tgz 349ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/update-browserslist-db/-/update-browserslist-db-1.2.3.tgz 363ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/loose-envify/-/loose-envify-1.4.0.tgz 478ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/jsesc/-/jsesc-3.1.0.tgz 509ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/semver/-/semver-6.3.1.tgz 567ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/browserslist/-/browserslist-4.28.1.tgz 588ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/baseline-browser-mapping/-/baseline-browser-mapping-2.10.12.tgz 716ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/esbuild/-/esbuild-0.27.4.tgz 701ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/acorn/-/acorn-8.16.0.tgz 829ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/json5/-/json5-2.2.3.tgz 842ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/jiti/-/jiti-2.6.1.tgz 1113ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/@babel/parser/-/parser-7.29.2.tgz 1128ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.60.0.tgz 1142ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/js-yaml/-/js-yaml-4.1.1.tgz 1182ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.60.0.tgz 1186ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/@tailwindcss/oxide-win32-x64-msvc/-/oxide-win32-x64-msvc-4.2.2.tgz 1304ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/semver/-/semver-7.7.4.tgz 1292ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/rollup/-/rollup-4.60.0.tgz 1418ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/vite/-/vite-7.3.1.tgz 1496ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.27.4.tgz 1773ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/@napi-rs/canvas-win32-x64-msvc/-/canvas-win32-x64-msvc-0.1.97.tgz 2653ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/typescript/-/typescript-5.8.3.tgz 3257ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/eslint/-/eslint-9.39.4.tgz 3681ms (cache miss)
+npm http fetch GET 200 https://registry.npmjs.org/pnpm/-/pnpm-10.33.0.tgz 8594ms (cache miss)
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\.bin\\rollup',
+npm warn cleanup     [Error: EISDIR: illegal operation on a directory, lstat 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\.bin\rollup'] {
+npm warn cleanup       errno: -4068,
+npm warn cleanup       code: 'EISDIR',
+npm warn cleanup       syscall: 'lstat',
+npm warn cleanup       path: 'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\.bin\\rollup'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\.bin\\json5',
+npm warn cleanup     [Error: EISDIR: illegal operation on a directory, lstat 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\.bin\json5'] {
+npm warn cleanup       errno: -4068,
+npm warn cleanup       code: 'EISDIR',
+npm warn cleanup       syscall: 'lstat',
+npm warn cleanup       path: 'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\.bin\\json5'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\eslint',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\eslint\lib'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\eslint\\lib'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\eslint',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\eslint\lib'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\eslint\\lib'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\pnpm',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\pnpm\dist\node_modules\node-gyp\gyp\data'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\data'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\pnpm',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\pnpm\dist\node_modules\node-gyp\gyp\pylib\gyp'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'X:\\home\\jenbensen\\code-stuffs\\Weber\\AI_scheduler\\frontend\\node_modules\\pnpm\\dist\\node_modules\\node-gyp\\gyp\\pylib\\gyp'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
+npm verbose stack Error: EISDIR: illegal operation on a directory, lstat 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\.bin\json5'
+npm verbose stack     at async lstat (node:internal/fs/promises:1028:18)
+npm verbose stack     at async Promise.all (index 0)
+npm verbose stack     at async Promise.all (index 0)
+npm verbose stack     at async Promise.all (index 0)
+npm verbose stack     at async #createBinLinks (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\rebuild.js:394:5)
+npm verbose stack     at async Promise.allSettled (index 9)
+npm verbose stack     at async #linkAllBins (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\rebuild.js:375:5)
+npm verbose stack     at async #build (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\rebuild.js:160:7)
+npm verbose stack     at async Arborist.rebuild (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\rebuild.js:62:5)
+npm verbose stack     at async [reifyPackages] (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:325:11)
+npm error code EISDIR
+npm error syscall lstat
+npm error path X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\.bin\json5
+npm error errno -4068
+npm error EISDIR: illegal operation on a directory, lstat 'X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend\node_modules\.bin\json5'
+npm verbose cwd X:\home\jenbensen\code-stuffs\Weber\AI_scheduler\frontend
+npm verbose os Windows_NT 10.0.26200
+npm verbose node v22.17.0
+npm verbose npm  v10.9.2
+npm verbose exit -4068
+npm verbose code -4068
+npm error A complete log of this run can be found in: C:\Users\jenbe\AppData\Local\npm-cache\_logs\2026-04-02T19_13_40_873Z-debug-0.log
