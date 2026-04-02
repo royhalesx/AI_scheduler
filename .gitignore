@@ -1,0 +1,29 @@
+# Environment
+.env
+*.env
+
+# Go binary
+backend/byu-scheduler
+
+# Embedding indexes (large, rebuilt with --reindex)
+backend/data/embeddings_*.json
+
+# Reindex log
+backend/reindex.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Scraper raw output (large, re-runnable)
+scraper/output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node Components
+frontend/node_modules

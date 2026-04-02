@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BYU Scheduler</title>
+    <script type="module" crossorigin src="/assets/index-BoN_x2PN.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BHKnAwC0.css">
+    <script>
+(function() {
+  var seen = {};
+  function send(err) {
+    try { window.parent.postMessage({ type: "appifex:web-error", error: err }, "*"); } catch(e) {}
+  }
+  window.addEventListener("error", function(e) {
+    var key = e.message + "|" + e.filename + "|" + e.lineno;
+    if (seen[key]) return;
+    seen[key] = 1;
+    if (e.filename && e.filename.indexOf(location.host) === -1) return;
+    send({
+      category: "runtime",
+      message: e.message,
+      file: e.filename ? e.filename.replace(location.origin, "") : undefined,
+      line: e.lineno || undefined,
+      column: e.colno || undefined,
+      stack: e.error && e.error.stack ? e.error.stack : undefined
+    });
+  });
+  window.addEventListener("unhandledrejection", function(e) {
+    var r = e.reason;
+    var msg = r && r.message ? r.message : String(r);
+    var key = "rejection|" + msg;
+    if (seen[key]) return;
+    seen[key] = 1;
+    send({
+      category: "runtime",
+      message: "Unhandled Promise Rejection: " + msg,
+      stack: r && r.stack ? r.stack : undefined
+    });
+  });
+  window.__appifexClearErrors = function() { seen = {}; };
+})();
+</script>
+    <script type="module">
+if (import.meta.hot) {
+  import.meta.hot.on("vite:error", function(data) {
+    var err = data.err;
+    try {
+      window.parent.postMessage({
+        type: "appifex:web-error",
+        error: {
+          category: "compile",
+          message: err.message,
+          file: err.loc && err.loc.file ? err.loc.file : undefined,
+          line: err.loc && err.loc.line ? err.loc.line : undefined,
+          column: err.loc && err.loc.column ? err.loc.column : undefined,
+          stack: err.stack
+        }
+      }, "*");
+    } catch(e) {}
+  });
+  import.meta.hot.on("vite:beforeUpdate", function() {
+    try {
+      window.parent.postMessage({ type: "appifex:web-error-cleared" }, "*");
+      if (window.__appifexClearErrors) window.__appifexClearErrors();
+    } catch(e) {}
+  });
+}
+</script>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

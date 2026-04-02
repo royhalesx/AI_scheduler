@@ -1,0 +1,4 @@
+requests
+beautifulsoup4
+thefuzz
+python-dotenv

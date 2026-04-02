@@ -1,0 +1,1387 @@
+[
+  {
+    "id": "30797",
+    "name": "Accounting",
+    "requirements": []
+  },
+  {
+    "id": "34574",
+    "name": "Accounting",
+    "requirements": []
+  },
+  {
+    "id": "34630",
+    "name": "Acting",
+    "requirements": []
+  },
+  {
+    "id": "34709",
+    "name": "Actuarial Science",
+    "requirements": []
+  },
+  {
+    "id": "34562",
+    "name": "American Studies",
+    "requirements": []
+  },
+  {
+    "id": "33507",
+    "name": "Ancient Near Eastern Studies",
+    "requirements": []
+  },
+  {
+    "id": "34617",
+    "name": "Animation",
+    "requirements": []
+  },
+  {
+    "id": "30916",
+    "name": "Anthropology",
+    "requirements": []
+  },
+  {
+    "id": "29415",
+    "name": "Anthropology",
+    "requirements": []
+  },
+  {
+    "id": "34596",
+    "name": "Anthropology: Cultural and Linguistic Double Major",
+    "requirements": []
+  },
+  {
+    "id": "34636",
+    "name": "Applied English Linguistics",
+    "requirements": []
+  },
+  {
+    "id": "34702",
+    "name": "Applied Physics",
+    "requirements": []
+  },
+  {
+    "id": "32609",
+    "name": "Arabic Language",
+    "requirements": []
+  },
+  {
+    "id": "34610",
+    "name": "Art",
+    "requirements": []
+  },
+  {
+    "id": "25338",
+    "name": "Art",
+    "requirements": []
+  },
+  {
+    "id": "30872",
+    "name": "Art",
+    "requirements": []
+  },
+  {
+    "id": "31281",
+    "name": "Art Education",
+    "requirements": []
+  },
+  {
+    "id": "34614",
+    "name": "Art Education K-12",
+    "requirements": []
+  },
+  {
+    "id": "34642",
+    "name": "Art History & Curatorial Studies",
+    "requirements": []
+  },
+  {
+    "id": "25340",
+    "name": "Art History & Curatorial Studies",
+    "requirements": []
+  },
+  {
+    "id": "32883",
+    "name": "Asian Studies",
+    "requirements": []
+  },
+  {
+    "id": "34238",
+    "name": "Athletic Training",
+    "requirements": []
+  },
+  {
+    "id": "22332",
+    "name": "Audiology",
+    "requirements": []
+  },
+  {
+    "id": "34682",
+    "name": "Biochemistry",
+    "requirements": []
+  },
+  {
+    "id": "28596",
+    "name": "Biochemistry",
+    "requirements": []
+  },
+  {
+    "id": "28597",
+    "name": "Biochemistry",
+    "requirements": []
+  },
+  {
+    "id": "34661",
+    "name": "Biodiversity & Conservation",
+    "requirements": []
+  },
+  {
+    "id": "34662",
+    "name": "Bioinformatics",
+    "requirements": []
+  },
+  {
+    "id": "34277",
+    "name": "Biological Science Education",
+    "requirements": []
+  },
+  {
+    "id": "20220",
+    "name": "Biological Science Education",
+    "requirements": []
+  },
+  {
+    "id": "34660",
+    "name": "Biology",
+    "requirements": []
+  },
+  {
+    "id": "32263",
+    "name": "Biology",
+    "requirements": []
+  },
+  {
+    "id": "32262",
+    "name": "Biology",
+    "requirements": []
+  },
+  {
+    "id": "34448",
+    "name": "Biophysics",
+    "requirements": []
+  },
+  {
+    "id": "20154",
+    "name": "Business Administration",
+    "requirements": []
+  },
+  {
+    "id": "30755",
+    "name": "Business Administration",
+    "requirements": []
+  },
+  {
+    "id": "O4shbWDBeZPiplMa8dng",
+    "name": "Business Administration ",
+    "requirements": []
+  },
+  {
+    "id": "34575",
+    "name": "Business Management",
+    "requirements": []
+  },
+  {
+    "id": "34667",
+    "name": "Cell Biology and Physiology",
+    "requirements": []
+  },
+  {
+    "id": "34544",
+    "name": "Cell Biology and Physiology",
+    "requirements": []
+  },
+  {
+    "id": "34545",
+    "name": "Cell Biology and Physiology",
+    "requirements": []
+  },
+  {
+    "id": "34051",
+    "name": "Chaplaincy",
+    "requirements": []
+  },
+  {
+    "id": "34593",
+    "name": "Chemical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "22776",
+    "name": "Chemical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "22799",
+    "name": "Chemical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34684",
+    "name": "Chemistry",
+    "requirements": []
+  },
+  {
+    "id": "34480",
+    "name": "Chemistry",
+    "requirements": []
+  },
+  {
+    "id": "28605",
+    "name": "Chemistry",
+    "requirements": []
+  },
+  {
+    "id": "28606",
+    "name": "Chemistry",
+    "requirements": []
+  },
+  {
+    "id": "34482",
+    "name": "Chemistry Education",
+    "requirements": []
+  },
+  {
+    "id": "33902",
+    "name": "Chinese",
+    "requirements": []
+  },
+  {
+    "id": "34591",
+    "name": "Civil Engineering",
+    "requirements": []
+  },
+  {
+    "id": "22884",
+    "name": "Civil Engineering",
+    "requirements": []
+  },
+  {
+    "id": "22893",
+    "name": "Civil Engineering",
+    "requirements": []
+  },
+  {
+    "id": "30878",
+    "name": "Classical Studies",
+    "requirements": []
+  },
+  {
+    "id": "34550",
+    "name": "Clinical Psychology",
+    "requirements": []
+  },
+  {
+    "id": "34632",
+    "name": "Commercial Music",
+    "requirements": []
+  },
+  {
+    "id": "34431",
+    "name": "Communication Disorders",
+    "requirements": []
+  },
+  {
+    "id": "31724",
+    "name": "Communication Disorders",
+    "requirements": []
+  },
+  {
+    "id": "30856",
+    "name": "Communications",
+    "requirements": []
+  },
+  {
+    "id": "20163",
+    "name": "Comparative Law",
+    "requirements": []
+  },
+  {
+    "id": "33477",
+    "name": "Comparative Literature",
+    "requirements": []
+  },
+  {
+    "id": "30988",
+    "name": "Comparative Studies",
+    "requirements": []
+  },
+  {
+    "id": "34200",
+    "name": "Computer Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34712",
+    "name": "Computer Science",
+    "requirements": []
+  },
+  {
+    "id": "31516",
+    "name": "Computer Science",
+    "requirements": []
+  },
+  {
+    "id": "28673",
+    "name": "Computer Science",
+    "requirements": []
+  },
+  {
+    "id": "28674",
+    "name": "Computer Science",
+    "requirements": []
+  },
+  {
+    "id": "34557",
+    "name": "Construction Engineering Management",
+    "requirements": []
+  },
+  {
+    "id": "34556",
+    "name": "Construction and Facilities Management",
+    "requirements": []
+  },
+  {
+    "id": "22313",
+    "name": "Counseling Psychology",
+    "requirements": []
+  },
+  {
+    "id": "32270",
+    "name": "Creative Writing",
+    "requirements": []
+  },
+  {
+    "id": "34586",
+    "name": "Cybersecurity",
+    "requirements": []
+  },
+  {
+    "id": "34699",
+    "name": "Dance",
+    "requirements": []
+  },
+  {
+    "id": "28254",
+    "name": "Dance",
+    "requirements": []
+  },
+  {
+    "id": "34624",
+    "name": "Dance ",
+    "requirements": []
+  },
+  {
+    "id": "34514",
+    "name": "Dance BFA Premajor",
+    "requirements": []
+  },
+  {
+    "id": "34626",
+    "name": "Dance Education K-12",
+    "requirements": []
+  },
+  {
+    "id": "cCQhj7GN2hR4tO4DD4yL",
+    "name": "Data Science",
+    "requirements": []
+  },
+  {
+    "id": "33337",
+    "name": "Design",
+    "requirements": []
+  },
+  {
+    "id": "34665",
+    "name": "Dietetics",
+    "requirements": []
+  },
+  {
+    "id": "34579",
+    "name": "Early Childhood Education",
+    "requirements": []
+  },
+  {
+    "id": "34373",
+    "name": "Earth & Space Science Education",
+    "requirements": []
+  },
+  {
+    "id": "34561",
+    "name": "Economics",
+    "requirements": []
+  },
+  {
+    "id": "34639",
+    "name": "Editing and Publishing",
+    "requirements": []
+  },
+  {
+    "id": "32225",
+    "name": "Educ Inquiry, Measurement, & Evaluation",
+    "requirements": []
+  },
+  {
+    "id": "33887",
+    "name": "Educational Leadership",
+    "requirements": []
+  },
+  {
+    "id": "22116",
+    "name": "Educational Leadership",
+    "requirements": []
+  },
+  {
+    "id": "22127",
+    "name": "Educational Leadership",
+    "requirements": []
+  },
+  {
+    "id": "22130",
+    "name": "Educational Leadership",
+    "requirements": []
+  },
+  {
+    "id": "31278",
+    "name": "Electrical & Computer Engineering",
+    "requirements": []
+  },
+  {
+    "id": "31279",
+    "name": "Electrical & Computer Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34594",
+    "name": "Electrical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34429",
+    "name": "Elementary Education",
+    "requirements": []
+  },
+  {
+    "id": "34646",
+    "name": "English",
+    "requirements": []
+  },
+  {
+    "id": "25758",
+    "name": "English",
+    "requirements": []
+  },
+  {
+    "id": "34648",
+    "name": "English Teaching ",
+    "requirements": []
+  },
+  {
+    "id": "34577",
+    "name": "Entrepreneurial Management",
+    "requirements": []
+  },
+  {
+    "id": "34681",
+    "name": "Environmental Geology",
+    "requirements": []
+  },
+  {
+    "id": "32271",
+    "name": "Environmental Science",
+    "requirements": []
+  },
+  {
+    "id": "34672",
+    "name": "Environmental Science and Sustainability",
+    "requirements": []
+  },
+  {
+    "id": "33794",
+    "name": "European Studies",
+    "requirements": []
+  },
+  {
+    "id": "20156",
+    "name": "Executive MBA",
+    "requirements": []
+  },
+  {
+    "id": "34261",
+    "name": "Exercise & Wellness",
+    "requirements": []
+  },
+  {
+    "id": "34262",
+    "name": "Exercise Science",
+    "requirements": []
+  },
+  {
+    "id": "34239",
+    "name": "Exercise Science",
+    "requirements": []
+  },
+  {
+    "id": "31265",
+    "name": "Exercise Sciences",
+    "requirements": []
+  },
+  {
+    "id": "31260",
+    "name": "Exercise Sciences",
+    "requirements": []
+  },
+  {
+    "id": "31261",
+    "name": "Exercise Sciences",
+    "requirements": []
+  },
+  {
+    "id": "31266",
+    "name": "Exercise Sciences",
+    "requirements": []
+  },
+  {
+    "id": "34578",
+    "name": "Experience Design and Management",
+    "requirements": []
+  },
+  {
+    "id": "34601",
+    "name": "Family & Consumer Sciences Education",
+    "requirements": []
+  },
+  {
+    "id": "34456",
+    "name": "Family History - Genealogy",
+    "requirements": []
+  },
+  {
+    "id": "32082",
+    "name": "Family Life",
+    "requirements": []
+  },
+  {
+    "id": "34565",
+    "name": "Finance",
+    "requirements": []
+  },
+  {
+    "id": "34666",
+    "name": "Food Science",
+    "requirements": []
+  },
+  {
+    "id": "21021",
+    "name": "Food Science",
+    "requirements": []
+  },
+  {
+    "id": "34434",
+    "name": "French",
+    "requirements": []
+  },
+  {
+    "id": "34435",
+    "name": "French Studies",
+    "requirements": []
+  },
+  {
+    "id": "34649",
+    "name": "French Teaching",
+    "requirements": []
+  },
+  {
+    "id": "30800",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "34356",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "30874",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "30884",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "34233",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "30925",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "30927",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "30928",
+    "name": "General Studies",
+    "requirements": []
+  },
+  {
+    "id": "21374",
+    "name": "Genetics & Biotechnology",
+    "requirements": []
+  },
+  {
+    "id": "34528",
+    "name": "Genetics, Genomics & Biotechnology",
+    "requirements": []
+  },
+  {
+    "id": "31040",
+    "name": "Geography",
+    "requirements": []
+  },
+  {
+    "id": "29768",
+    "name": "Geography",
+    "requirements": []
+  },
+  {
+    "id": "30923",
+    "name": "Geography",
+    "requirements": []
+  },
+  {
+    "id": "34087",
+    "name": "Geography: Global Studies",
+    "requirements": []
+  },
+  {
+    "id": "34680",
+    "name": "Geology",
+    "requirements": []
+  },
+  {
+    "id": "28834",
+    "name": "Geology",
+    "requirements": []
+  },
+  {
+    "id": "30910",
+    "name": "Geology",
+    "requirements": []
+  },
+  {
+    "id": "31563",
+    "name": "German",
+    "requirements": []
+  },
+  {
+    "id": "34340",
+    "name": "German Studies",
+    "requirements": []
+  },
+  {
+    "id": "34341",
+    "name": "German Teaching",
+    "requirements": []
+  },
+  {
+    "id": "34423",
+    "name": "Global Supply Chain Management",
+    "requirements": []
+  },
+  {
+    "id": "34616",
+    "name": "Graphic Design",
+    "requirements": []
+  },
+  {
+    "id": "34697",
+    "name": "History",
+    "requirements": []
+  },
+  {
+    "id": "30065",
+    "name": "History",
+    "requirements": []
+  },
+  {
+    "id": "34598",
+    "name": "History Teaching",
+    "requirements": []
+  },
+  {
+    "id": "34304",
+    "name": "Human Resource Management",
+    "requirements": []
+  },
+  {
+    "id": "34558",
+    "name": "IT & Cybersecurity",
+    "requirements": []
+  },
+  {
+    "id": "34618",
+    "name": "Illustration",
+    "requirements": []
+  },
+  {
+    "id": "34303",
+    "name": "Information Systems",
+    "requirements": []
+  },
+  {
+    "id": "34302",
+    "name": "Information Systems",
+    "requirements": []
+  },
+  {
+    "id": "20143",
+    "name": "Information Systems Management",
+    "requirements": []
+  },
+  {
+    "id": "34248",
+    "name": "Information Technology",
+    "requirements": []
+  },
+  {
+    "id": "22592",
+    "name": "Instructional Psychology & Technology",
+    "requirements": []
+  },
+  {
+    "id": "22597",
+    "name": "Instructional Psychology & Technology",
+    "requirements": []
+  },
+  {
+    "id": "30815",
+    "name": "Instructional Psychology & Technology",
+    "requirements": []
+  },
+  {
+    "id": "30816",
+    "name": "Instructional Psychology & Technology",
+    "requirements": []
+  },
+  {
+    "id": "34537",
+    "name": "Interdisciplinary Design",
+    "requirements": []
+  },
+  {
+    "id": "34309",
+    "name": "Interdisciplinary Humanities",
+    "requirements": []
+  },
+  {
+    "id": "34475",
+    "name": "International Relations",
+    "requirements": []
+  },
+  {
+    "id": "34270",
+    "name": "Italian",
+    "requirements": []
+  },
+  {
+    "id": "34271",
+    "name": "Italian Studies",
+    "requirements": []
+  },
+  {
+    "id": "33407",
+    "name": "Japanese",
+    "requirements": []
+  },
+  {
+    "id": "34138",
+    "name": "Korean",
+    "requirements": []
+  },
+  {
+    "id": "34130",
+    "name": "Latin American Studies",
+    "requirements": []
+  },
+  {
+    "id": "34379",
+    "name": "Latin Teaching",
+    "requirements": []
+  },
+  {
+    "id": "20161",
+    "name": "Law",
+    "requirements": []
+  },
+  {
+    "id": "34637",
+    "name": "Linguistics",
+    "requirements": []
+  },
+  {
+    "id": "26829",
+    "name": "Linguistics",
+    "requirements": []
+  },
+  {
+    "id": "34716",
+    "name": "Machine Learning",
+    "requirements": []
+  },
+  {
+    "id": "34345",
+    "name": "Manufacturing Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34245",
+    "name": "Manufacturing Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34424",
+    "name": "Marketing",
+    "requirements": []
+  },
+  {
+    "id": "29892",
+    "name": "Marriage & Family Therapy",
+    "requirements": []
+  },
+  {
+    "id": "29894",
+    "name": "Marriage & Family Therapy",
+    "requirements": []
+  },
+  {
+    "id": "30379",
+    "name": "Marriage, Family, & Human Development",
+    "requirements": []
+  },
+  {
+    "id": "30380",
+    "name": "Marriage, Family, & Human Development",
+    "requirements": []
+  },
+  {
+    "id": "24325",
+    "name": "Mass Communications",
+    "requirements": []
+  },
+  {
+    "id": "34678",
+    "name": "Mathematics",
+    "requirements": []
+  },
+  {
+    "id": "32924",
+    "name": "Mathematics",
+    "requirements": []
+  },
+  {
+    "id": "28935",
+    "name": "Mathematics",
+    "requirements": []
+  },
+  {
+    "id": "28937",
+    "name": "Mathematics",
+    "requirements": []
+  },
+  {
+    "id": "34430",
+    "name": "Mathematics Education",
+    "requirements": []
+  },
+  {
+    "id": "34406",
+    "name": "Mathematics Education",
+    "requirements": []
+  },
+  {
+    "id": "34354",
+    "name": "Mechanical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34589",
+    "name": "Mechanical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "23339",
+    "name": "Mechanical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "23359",
+    "name": "Mechanical Engineering",
+    "requirements": []
+  },
+  {
+    "id": "34629",
+    "name": "Media Arts Studies",
+    "requirements": []
+  },
+  {
+    "id": "33696",
+    "name": "Media and Performance Studies",
+    "requirements": []
+  },
+  {
+    "id": "34066",
+    "name": "Medical Laboratory Science",
+    "requirements": []
+  },
+  {
+    "id": "34669",
+    "name": "Microbiology",
+    "requirements": []
+  },
+  {
+    "id": "33283",
+    "name": "Microbiology and Molecular Biology",
+    "requirements": []
+  },
+  {
+    "id": "33284",
+    "name": "Microbiology and Molecular Biology",
+    "requirements": []
+  },
+  {
+    "id": "34132",
+    "name": "Middle East Studies / Arabic",
+    "requirements": []
+  },
+  {
+    "id": "34668",
+    "name": "Molecular Biology",
+    "requirements": []
+  },
+  {
+    "id": "34507",
+    "name": "Music",
+    "requirements": []
+  },
+  {
+    "id": "24855",
+    "name": "Music",
+    "requirements": []
+  },
+  {
+    "id": "24857",
+    "name": "Music",
+    "requirements": []
+  },
+  {
+    "id": "30865",
+    "name": "Music",
+    "requirements": []
+  },
+  {
+    "id": "30866",
+    "name": "Music",
+    "requirements": []
+  },
+  {
+    "id": "34511",
+    "name": "Music Composition",
+    "requirements": []
+  },
+  {
+    "id": "34627",
+    "name": "Music Dance Theatre",
+    "requirements": []
+  },
+  {
+    "id": "30864",
+    "name": "Music Education",
+    "requirements": []
+  },
+  {
+    "id": "34265",
+    "name": "Music Education",
+    "requirements": []
+  },
+  {
+    "id": "31001",
+    "name": "Music Performance",
+    "requirements": []
+  },
+  {
+    "id": "34663",
+    "name": "Neuroscience",
+    "requirements": []
+  },
+  {
+    "id": "21364",
+    "name": "Neuroscience",
+    "requirements": []
+  },
+  {
+    "id": "21366",
+    "name": "Neuroscience",
+    "requirements": []
+  },
+  {
+    "id": "34659",
+    "name": "Nursing",
+    "requirements": []
+  },
+  {
+    "id": "27582",
+    "name": "Nursing",
+    "requirements": []
+  },
+  {
+    "id": "30886",
+    "name": "Nursing",
+    "requirements": []
+  },
+  {
+    "id": "33694",
+    "name": "Nutritional Science and Dietetics",
+    "requirements": []
+  },
+  {
+    "id": "33886",
+    "name": "Nutritional Science and Dietetics",
+    "requirements": []
+  },
+  {
+    "id": "34257",
+    "name": "Philosophy",
+    "requirements": []
+  },
+  {
+    "id": "34536",
+    "name": "Photo- & Lens- Based Design",
+    "requirements": []
+  },
+  {
+    "id": "34314",
+    "name": "Physical Education Tchg/Coaching (K-12)",
+    "requirements": []
+  },
+  {
+    "id": "34376",
+    "name": "Physical Science Education",
+    "requirements": []
+  },
+  {
+    "id": "34700",
+    "name": "Physics",
+    "requirements": []
+  },
+  {
+    "id": "29123",
+    "name": "Physics",
+    "requirements": []
+  },
+  {
+    "id": "29124",
+    "name": "Physics",
+    "requirements": []
+  },
+  {
+    "id": "29118",
+    "name": "Physics & Astronomy",
+    "requirements": []
+  },
+  {
+    "id": "34375",
+    "name": "Physics Education",
+    "requirements": []
+  },
+  {
+    "id": "34701",
+    "name": "Physics and Astronomy",
+    "requirements": []
+  },
+  {
+    "id": "34671",
+    "name": "Plant and Landscape Systems",
+    "requirements": []
+  },
+  {
+    "id": "34688",
+    "name": "Political Science",
+    "requirements": []
+  },
+  {
+    "id": "34689",
+    "name": "Political Science",
+    "requirements": []
+  },
+  {
+    "id": "34442",
+    "name": "Portuguese",
+    "requirements": []
+  },
+  {
+    "id": "30881",
+    "name": "Portuguese",
+    "requirements": []
+  },
+  {
+    "id": "27115",
+    "name": "Portuguese",
+    "requirements": []
+  },
+  {
+    "id": "34651",
+    "name": "Portuguese Studies (Secondary Major)",
+    "requirements": []
+  },
+  {
+    "id": "34580",
+    "name": "Product & User Experience Design",
+    "requirements": []
+  },
+  {
+    "id": "25123",
+    "name": "Production Design",
+    "requirements": []
+  },
+  {
+    "id": "20142",
+    "name": "Professional Accountancy",
+    "requirements": []
+  },
+  {
+    "id": "34560",
+    "name": "Professional Language",
+    "requirements": []
+  },
+  {
+    "id": "34250",
+    "name": "Psychology",
+    "requirements": []
+  },
+  {
+    "id": "30377",
+    "name": "Psychology",
+    "requirements": []
+  },
+  {
+    "id": "30378",
+    "name": "Psychology",
+    "requirements": []
+  },
+  {
+    "id": "20150",
+    "name": "Public Administration",
+    "requirements": []
+  },
+  {
+    "id": "30754",
+    "name": "Public Administration",
+    "requirements": []
+  },
+  {
+    "id": "32802",
+    "name": "Public Health",
+    "requirements": []
+  },
+  {
+    "id": "27743",
+    "name": "Public Health",
+    "requirements": []
+  },
+  {
+    "id": "30890",
+    "name": "Public Health",
+    "requirements": []
+  },
+  {
+    "id": "22678",
+    "name": "Reading",
+    "requirements": []
+  },
+  {
+    "id": "30686",
+    "name": "Religious Education",
+    "requirements": []
+  },
+  {
+    "id": "33524",
+    "name": "Russian",
+    "requirements": []
+  },
+  {
+    "id": "31271",
+    "name": "School Psychology",
+    "requirements": []
+  },
+  {
+    "id": "32413",
+    "name": "Second Language Teaching",
+    "requirements": []
+  },
+  {
+    "id": "34597",
+    "name": "Social Science Teaching",
+    "requirements": []
+  },
+  {
+    "id": "30563",
+    "name": "Social Work",
+    "requirements": []
+  },
+  {
+    "id": "34125",
+    "name": "Sociology",
+    "requirements": []
+  },
+  {
+    "id": "30511",
+    "name": "Sociology",
+    "requirements": []
+  },
+  {
+    "id": "30521",
+    "name": "Sociology",
+    "requirements": []
+  },
+  {
+    "id": "30933",
+    "name": "Sociology",
+    "requirements": []
+  },
+  {
+    "id": "34439",
+    "name": "Spanish",
+    "requirements": []
+  },
+  {
+    "id": "30882",
+    "name": "Spanish",
+    "requirements": []
+  },
+  {
+    "id": "27117",
+    "name": "Spanish",
+    "requirements": []
+  },
+  {
+    "id": "34653",
+    "name": "Spanish Studies (Secondary Major)",
+    "requirements": []
+  },
+  {
+    "id": "34441",
+    "name": "Spanish Teaching",
+    "requirements": []
+  },
+  {
+    "id": "34654",
+    "name": "Spanish Translation",
+    "requirements": []
+  },
+  {
+    "id": "31064",
+    "name": "Special Education",
+    "requirements": []
+  },
+  {
+    "id": "32047",
+    "name": "Statistics",
+    "requirements": []
+  },
+  {
+    "id": "29279",
+    "name": "Statistics",
+    "requirements": []
+  },
+  {
+    "id": "34306",
+    "name": "Strategic Management",
+    "requirements": []
+  },
+  {
+    "id": "26837",
+    "name": "TESOL",
+    "requirements": []
+  },
+  {
+    "id": "20141",
+    "name": "Tax",
+    "requirements": []
+  },
+  {
+    "id": "31005",
+    "name": "Teacher Education",
+    "requirements": []
+  },
+  {
+    "id": "31007",
+    "name": "Teacher Education",
+    "requirements": []
+  },
+  {
+    "id": "31006",
+    "name": "Teacher Education",
+    "requirements": []
+  },
+  {
+    "id": "30849",
+    "name": "Technology",
+    "requirements": []
+  },
+  {
+    "id": "33823",
+    "name": "Technology & Engineering Studies",
+    "requirements": []
+  },
+  {
+    "id": "23726",
+    "name": "Technology and Engineering Education ",
+    "requirements": []
+  },
+  {
+    "id": "25109",
+    "name": "Theatre & Media Arts",
+    "requirements": []
+  },
+  {
+    "id": "34513",
+    "name": "Theatre Arts Education K-12",
+    "requirements": []
+  },
+  {
+    "id": "34318",
+    "name": "Theatre Arts Studies",
+    "requirements": []
+  },
+  {
+    "id": "34526",
+    "name": "Wildlife & Wildlands Conservation",
+    "requirements": []
+  },
+  {
+    "id": "20222",
+    "name": "Wildlife & Wildlands Conservation",
+    "requirements": []
+  },
+  {
+    "id": "20224",
+    "name": "Wildlife & Wildlands Conservation",
+    "requirements": []
+  }
+]

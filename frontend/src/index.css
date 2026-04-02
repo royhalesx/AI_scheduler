@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-mono: 'Futura', 'Futura PT', 'Jost', ui-sans-serif, system-ui, sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  /* BYU brand colors */
+  --color-byu-navy: #002E5D;
+  --color-byu-royal: #0047BA;
+  --color-byu-blue: #003d99;
+  --color-byu-light: #7099c0;
+  --color-byu-orange: #D14124;
+  --color-byu-plum: #A73A64;
+  --color-byu-green: #00966C;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.6rem;
+  --background: #ffffff;
+  --foreground: #002E5D;
+  --card: #f4f7fc;
+  --card-foreground: #002E5D;
+  --popover: #ffffff;
+  --popover-foreground: #002E5D;
+  --primary: #0047BA;
+  --primary-foreground: #ffffff;
+  --secondary: #e8eef8;
+  --secondary-foreground: #002E5D;
+  --muted: #f4f7fc;
+  --muted-foreground: #3d5a80;
+  --accent: #0047BA;
+  --accent-foreground: #ffffff;
+  --destructive: #b91c1c;
+  --border: #b8cde0;
+  --input: #b8cde0;
+  --ring: #0047BA;
+  --chart-1: #0072CE;
+  --chart-2: #BDD6E6;
+  --chart-3: #A73A64;
+  --chart-4: #D14124;
+  --chart-5: #00966C;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #002E5D;
+  --sidebar-primary: #0047BA;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8eef8;
+  --sidebar-accent-foreground: #002E5D;
+  --sidebar-border: #c5d5e8;
+  --sidebar-ring: #0072CE;
+}
+
+.dark {
+  --background: #05101c;
+  --foreground: #ffffff;
+  --card: #0a1e35;
+  --card-foreground: #ffffff;
+  --popover: #0a1e35;
+  --popover-foreground: #ffffff;
+  --primary: #0047BA;
+  --primary-foreground: #ffffff;
+  --secondary: #0d2847;
+  --secondary-foreground: #e8f0fb;
+  --muted: #0a1e35;
+  --muted-foreground: #8eafd0;
+  --accent: #0072CE;
+  --accent-foreground: #ffffff;
+  --destructive: #E61744;
+  --border: #1a3a5c;
+  --input: #1a3a5c;
+  --ring: #0072CE;
+  --chart-1: #0072CE;
+  --chart-2: #BDD6E6;
+  --chart-3: #A73A64;
+  --chart-4: #D14124;
+  --chart-5: #00966C;
+  --sidebar: #05101c;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #0047BA;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0d2847;
+  --sidebar-accent-foreground: #e8f0fb;
+  --sidebar-border: #1a3a5c;
+  --sidebar-ring: #0072CE;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+  }
+
+  html {
+    font-family: 'Futura', 'Futura PT', 'Jost', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Futura', 'Futura PT', 'Jost', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .font-mono-code {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  ::selection {
+    background: rgba(0, 71, 186, 0.35);
+    color: #ffffff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
