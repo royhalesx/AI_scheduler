@@ -19,6 +19,8 @@ go build -o byu-scheduler ./...
 ./byu-scheduler --port 8080          # default port is 8000
 ```
 
+There is no test suite in this project.
+
 ### Frontend (from `frontend/`)
 ```bash
 pnpm dev       # start Vite dev server (localhost:5173)
@@ -45,6 +47,20 @@ Yearterm codes: `YYYYT` — T=1 (Winter), 2 (Spring), 3 (Summer), 4 (Fall). Curr
 ~/.fly/bin/fly ssh console --app byu-scheduler --command "/app/byu-scheduler --reindex-and-exit"
 ~/.fly/bin/fly machines restart <machine-id> --app byu-scheduler
 ```
+
+### Vercel frontend deployment (from `frontend/`)
+```bash
+# Install Vercel CLI (once per machine)
+npm install -g vercel
+
+# First-time setup (already done — .vercel/ dir is committed)
+vercel login
+
+# Redeploy to production
+vercel --prod
+```
+The frontend is linked to an existing Vercel project via `frontend/.vercel/project.json`.
+`vercel --prod` builds (`npm run build`) and deploys to the production URL automatically.
 
 ## Architecture
 
@@ -83,7 +99,15 @@ Request body: `message` + `term` (required); `currentSchedule`, `constraints`, `
 
 SSE format: `data: {"type": "text"|"error"|"done", "content": "..."}`
 
-The frontend parses action JSON blocks in the stream to auto-apply schedule changes.
+The LLM embeds action JSON in a fenced code block inside its text response. The frontend (`hooks/useChat.ts`) extracts and applies it on `done`, then strips the block from the displayed text. Two formats are supported:
+```json
+// Primary (from prompt): action + courses array
+{"action": "add"|"swap"|"suggest_schedule"|"remove", "courses": [{"courseId": "CS 235", "sectionId": "001"}]}
+
+// Legacy: direct addSections / removeCourseIds
+{"addSections": [...], "removeCourseIds": [...]}
+```
+Chat history is persisted to `localStorage` (`byu_chat`) and cleared on term switch.
 
 ### RAG pipeline (`backend/rag.go`)
 - `BuildEmbeddings` — embeds all courses (`input_type: "document"`), saves to `data/embeddings_<yearterm>.json`. 250ms delay between Voyage requests (stays under 300 RPM free tier). 5M token budget cap per run. Exponential backoff on 429s.
@@ -91,25 +115,31 @@ The frontend parses action JSON blocks in the stream to auto-apply schedule chan
 - `BuildRAGContext` — formats retrieved courses into the context block injected into the LLM prompt
 
 ### Frontend components (`frontend/src/`)
-- `App.jsx` — root layout, schedule state, React Router (`/` main, `/about` About page)
+- `App.jsx` — shell: global header + React Router (`/` → SchedulerHome, `/about` → AboutPage)
+- `pages/SchedulerHome.jsx` — main scheduling UI, all schedule state, AI/tracker tab switching
+- `pages/AboutPage.jsx` — static about page and team credits
 - `components/ScheduleGrid` — visual weekly calendar of selected courses
 - `components/AIChatPanel` — SSE streaming chat, parses action blocks to mutate schedule
 - `components/CourseSearch` — search/filter courses by name or department
-- `components/SectionDropdown` — select section from multiple offerings
+- `components/SectionDropdown` — select section from multiple offerings (used in course list)
+- `components/SectionPicker` — section selection modal/overlay (used when adding a course with multiple sections)
 - `components/WorkloadMeter` — total credits + estimated weekly hours
 - `components/MajorTrackerPanel` — requirement checklist; props: `requirements[]`, `completedCourses`, `onToggleCompleted`, `onAddCourse`
 - `components/ProfessorCard` — RMP rating display card
 - `hooks/useCourses` — fetches + filters courses from API
-- `hooks/useChat` — manages SSE chat connection
+- `hooks/useChat` — manages SSE chat connection, localStorage persistence, action block parsing
 - `lib/api.ts` — API client
 - `lib/scheduleUtils.ts` — conflict detection, workload estimation
 - `lib/parseDegreeAudit.ts` — parses BYU degree audit PDFs (via `pdfjs-dist`) into `ParsedDegreeAudit`; handles multi-word dept codes and PDF spacing quirks
+- `lib/geRequirements.ts` — static BYU GE requirement definitions (`GE_REQUIREMENTS: RequirementGroup[]`)
+- `types/scheduler.ts` — canonical frontend TypeScript types (`Course`, `Section`, `ScheduledCourse`, `RequirementGroup`, `ConstraintBlock`, `ScheduleUpdatePayload`, etc.)
 
 Right panel has two tabs: **AI Assistant** and **My Progress** (MajorTrackerPanel).
 
 `frontend/public/logo.png` — BYU Cougars logo, used as favicon and header logo. Tab title: "BYU Scheduler".
 
 ### Deployment
+- **Frontend**: deployed via Vercel CLI (`vercel --prod` from `frontend/`). Config in `frontend/vercel.json` (SPA rewrites + iframe headers). Linked project at `frontend/.vercel/`.
 - Multi-stage Docker build (`golang:1.18-alpine` → `alpine:3.19`), bundles `prompts/` and default data files
 - `start.sh` seeds the Fly volume with bundled `courses.json` + `rmp.json` on first boot
 - GitHub Actions: `scrape.yml` runs nightly at 3am MT; `deploy.yml` auto-deploys on push to `main` touching `backend/`

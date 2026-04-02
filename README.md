@@ -141,7 +141,36 @@ cd backend && ./byu-scheduler --reindex
 
 ---
 
-## Deployment (Fly.io)
+## Frontend Deployment (Vercel)
+
+The frontend is deployed via the [Vercel CLI](https://vercel.com/docs/cli) and linked to an existing Vercel project.
+
+### Redeploy
+
+```bash
+cd frontend
+
+# Install Vercel CLI (once per machine)
+npm install -g vercel
+
+# One-time login (only needed on a new machine)
+vercel login
+
+# Deploy to production
+vercel --prod
+```
+
+`vercel --prod` runs `npm run build` (tsc + vite) and pushes the output to Vercel's CDN. The project config lives in `frontend/.vercel/` — no additional flags needed.
+
+### Config
+
+`frontend/vercel.json` handles:
+- **SPA rewrites** — all routes rewritten to `/index.html` so React Router works on hard refresh
+- **iframe headers** — `X-Frame-Options: ALLOWALL` and `Content-Security-Policy: frame-ancestors *` so the app can be embedded
+
+---
+
+## Deployment (Fly.io — Backend)
 
 The app runs at `byu-scheduler.fly.dev` on a single shared-cpu-1x 256MB machine with a 1GB persistent volume at `/app/data/` for courses, RMP data, and embeddings.
 

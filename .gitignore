@@ -8,8 +8,10 @@ backend/byu-scheduler
 # Embedding indexes (large, rebuilt with --reindex)
 backend/data/embeddings_*.json
 
-# Reindex log
+# Logs
 backend/reindex.log
+backend/server.log
+frontend/*.log
 
 # Python
 __pycache__/

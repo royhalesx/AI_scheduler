@@ -334,14 +334,14 @@ export function MajorTrackerPanel({
               <div className="space-y-2">
                 <p className="text-sm font-medium">Step 1: Go to <a href="https://mymap.byu.edu/" target="_blank" rel="noreferrer" className="text-byu-royal underline hover:opacity-80">mymap.byu.edu</a> and navigate to the Progress Report page.</p>
                 <div className="w-full rounded-lg overflow-hidden border border-border">
-                  <img src="/myMap.png" alt="Step 1" className="w-full h-auto object-cover" />
+                  <img src="/images/myMap.png" alt="Step 1" className="w-full h-auto object-cover" />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Step 2: Click <strong>Generate Report</strong>, then save or print it as a PDF and upload it here.</p>
                 <div className="w-full rounded-lg overflow-hidden border border-border">
-                  <img src="/generateReport.png" alt="Step 2" className="w-full h-auto object-cover" />
+                  <img src="/images/generateReport.png" alt="Step 2" className="w-full h-auto object-cover" />
                 </div>
               </div>
             </div>

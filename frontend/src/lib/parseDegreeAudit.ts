@@ -128,8 +128,11 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
     // Top of page first (PDF Y-axis is inverted), items within a row left→right
     const sortedYs = [...byY.keys()].sort((a, b) => b - a)
     for (const y of sortedYs) {
+      // Join chunks without adding spaces — each PDF text chunk already
+      // includes its own trailing space when needed. Then collapse any
+      // accidental double-spaces left by empty chunks or rounding.
       const row = byY.get(y)!.sort((a, b) => a.x - b.x)
-      const line = row.map((i) => i.str).join(' ').trim()
+      const line = row.map((i) => i.str).join('').replace(/\s{2,}/g, ' ').trim()
       if (line) allLines.push(line)
     }
   }
@@ -186,6 +189,8 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
       // Skip GE and Religion sections — already covered by geRequirements.ts
       inRequirementsSection = !/General Education|^Religion$/i.test(cat)
       currentGroup = null
+      // Reset seen so courses shared between major and minor are captured in both
+      seen.clear()
       continue
     }
 
@@ -241,12 +246,20 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
 
     const { courseId, index, fullMatch } = match
 
-    // ── Credits: first decimal number after the course ID ──────────────
-    // Using a decimal (e.g. "3.0") avoids false hits on title words like
-    // "Capstone Design 1" before the real credits "3.0".
+    // ── Credits: decimal number adjacent to the course ID ──────────────
+    // BYU audit lines typically put credits BEFORE the course ID:
+    //   "3.0 CS 235 Data Structures Planned"
+    //   "4.0 MATH 341 Linear Algebra A"
+    // Fall back to looking after the ID, then default to 3.
+    const beforeId = line.slice(0, index)
     const afterId = line.slice(index + fullMatch.length)
-    const creditsMatch = afterId.match(/\b(\d+\.\d+)\b/)
-    const credits = creditsMatch ? parseFloat(creditsMatch[1]) : 3
+    const creditsBeforeMatch = beforeId.match(/\b(\d+\.\d+)\s*$/)
+    const creditsAfterMatch = afterId.match(/^\s*[-–]?\s*\w[^.]*?(\d+\.\d+)/)
+    const credits = creditsBeforeMatch
+      ? parseFloat(creditsBeforeMatch[1])
+      : creditsAfterMatch
+        ? parseFloat(creditsAfterMatch[1])
+        : 3
 
     // ── Completion: line has a final grade letter or 'In Progress' ──────────────
     if (COMPLETED_GRADE_RE.test(afterId) || /In Progress/i.test(afterId)) {
