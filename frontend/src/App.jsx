@@ -1,8 +1,9 @@
-import { CalendarDays, ChevronDown, Sparkles, ShieldCheck, X } from 'lucide-react'
+import { CalendarDays, ChevronDown, Github, GraduationCap, Linkedin, Sparkles, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { AIChatPanel } from '@/components/AIChatPanel'
 import { CourseSearch } from '@/components/CourseSearch'
+import { MajorTrackerPanel } from '@/components/MajorTrackerPanel'
 import { ScheduleGrid } from '@/components/ScheduleGrid'
 import { SectionDropdown } from '@/components/SectionDropdown'
 import { WorkloadMeter } from '@/components/WorkloadMeter'
@@ -25,10 +26,17 @@ function App() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b border-border/90 bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <Link to="/" className="cursor-pointer font-mono text-lg font-semibold text-foreground">
-            BYU Scheduler
+          <Link to="/" className="flex items-center gap-2 cursor-pointer">
+            <img src="/logo.png" alt="BYU Cougars" className="h-8 w-auto" />
+            <span className="font-mono text-lg font-semibold text-foreground">BYU Scheduler</span>
           </Link>
           <nav className="flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/"
+              className="h-11 cursor-pointer pt-2.5 rounded-xl border text-center border-border px-4 text-sm font-medium text-foreground transition-colors duration-200 hover:border-byu-blue/70 hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-byu-blue"
+            >
+              Schedule
+            </Link>
             <Link
               to="/about"
               className="h-11 cursor-pointer pt-2.5 rounded-xl border text-center border-border px-4 text-sm font-medium text-foreground transition-colors duration-200 hover:border-byu-blue/70 hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-byu-blue"
@@ -76,14 +84,30 @@ function SchedulerHome() {
   const [expandedCourseId, setExpandedCourseId] = useState(null)
   const [preAiSchedule, setPreAiSchedule] = useState(null)
   const [colorPickerOpenId, setColorPickerOpenId] = useState(null)
+  const [completedCourses, setCompletedCourses] = useState(() => loadJson('byu_completed', []))
+  const [rightTab, setRightTab] = useState('ai') // 'ai' | 'tracker'
 
   useEffect(() => { localStorage.setItem('byu_schedule', JSON.stringify(schedule)) }, [schedule])
   useEffect(() => { localStorage.setItem('byu_constraints', JSON.stringify(constraints)) }, [constraints])
+  useEffect(() => { localStorage.setItem('byu_completed', JSON.stringify(completedCourses)) }, [completedCourses])
 
   const courseMap = useMemo(() => new Map(courses.map((c) => [c.id, c])), [courses])
   const totalCredits = useMemo(() => schedule.reduce((sum, item) => sum + item.credits, 0), [schedule])
   const workloadHours = useMemo(() => estimateWeeklyLoadHours(schedule), [schedule])
   const scheduledCourseIds = useMemo(() => new Set(schedule.map((s) => s.courseId)), [schedule])
+
+  const completedSet = useMemo(() => new Set(completedCourses), [completedCourses])
+
+  // Hide completed courses from search results
+  const visibleCourses = useMemo(() =>
+    filteredCourses.filter(c => !completedSet.has(c.id))
+  , [filteredCourses, completedSet])
+
+  const handleToggleCompleted = (courseId) => {
+    setCompletedCourses(prev =>
+      prev.includes(courseId) ? prev.filter(id => id !== courseId) : [...prev, courseId]
+    )
+  }
 
   // Add course immediately on click from search, then open its dropdown
   const handleAddCourse = (course) => {
@@ -283,7 +307,7 @@ function SchedulerHome() {
           )}
 
           <CourseSearch
-            courses={filteredCourses}
+            courses={visibleCourses}
             query={query}
             onQueryChange={handleQueryChange}
             onAddCourse={handleAddCourse}
@@ -303,20 +327,55 @@ function SchedulerHome() {
           <WorkloadMeter credits={totalCredits} workloadHours={workloadHours} />
         </div>
 
-        {/* Right: AI chat only */}
+        {/* Right: AI chat / Major Tracker tabs */}
         <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border/90 bg-card/80 shadow-sm backdrop-blur-sm">
-          <div className="shrink-0 border-b border-border px-4 py-3">
-            <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">AI Co-Pilot</p>
-            <h3 className="font-mono text-sm font-semibold text-foreground">Schedule Assistant</h3>
+          {/* Tab bar */}
+          <div className="shrink-0 flex border-b border-border">
+            <button
+              type="button"
+              onClick={() => setRightTab('ai')}
+              className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-semibold transition-colors ${
+                rightTab === 'ai'
+                  ? 'border-b-2 border-byu-royal text-byu-royal'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Sparkles className="size-3.5" />
+              AI Assistant
+            </button>
+            <button
+              type="button"
+              onClick={() => setRightTab('tracker')}
+              className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-semibold transition-colors ${
+                rightTab === 'tracker'
+                  ? 'border-b-2 border-byu-royal text-byu-royal'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <GraduationCap className="size-3.5" />
+              My Progress
+            </button>
           </div>
+
           <div className="min-h-0 flex-1 overflow-hidden p-3">
-            <AIChatPanel
-              term={yearterm}
-              schedule={schedule}
-              constraints={constraints}
-              onScheduleUpdate={handleScheduleUpdate}
-              onRevertSchedule={preAiSchedule ? handleRevertSchedule : null}
-            />
+            {rightTab === 'ai' ? (
+              <AIChatPanel
+                term={yearterm}
+                schedule={schedule}
+                constraints={constraints}
+                onScheduleUpdate={handleScheduleUpdate}
+                onRevertSchedule={preAiSchedule ? handleRevertSchedule : null}
+                completedCourses={[...completedSet]}
+                remainingRequirements={[]}
+              />
+            ) : (
+              <MajorTrackerPanel
+                requirements={[]}
+                completedCourses={completedCourses}
+                onToggleCompleted={handleToggleCompleted}
+                onAddCourse={(courseId) => { handleAddCourse(courseMap.get(courseId)); setRightTab('ai') }}
+              />
+            )}
           </div>
         </div>
 
@@ -335,30 +394,78 @@ function InfoChip({ icon: Icon, label, value }) {
   )
 }
 
+const CREATORS = [
+  {
+    name: 'Ben Jensen',
+    github: 'jenbensen17',
+    linkedin: 'https://www.linkedin.com/in/benjamin-m-jensen/',
+  },
+  {
+    name: 'Roy Hales',
+    github: 'royhalesx',
+    linkedin: 'https://www.linkedin.com/in/roy-hales-240776271/',
+  },
+]
+
 function AboutPage() {
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 space-y-6">
       <section className="rounded-3xl border border-border bg-card/70 p-6 md:p-8">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-byu-light">About this project</p>
-        <h1 className="mt-3 font-mono text-3xl font-semibold text-foreground">AI Scheduling for the Competition Track</h1>
+        <h1 className="mt-3 font-mono text-3xl font-semibold text-foreground">BYU Scheduler</h1>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-          This frontend helps students plan a balanced BYU schedule by combining weekly calendar visualization,
-          professor quality insights, and AI-driven recommendations.
+          AI-powered course scheduling for BYU students. Build conflict-free schedules, compare professors,
+          balance your workload, and get personalized suggestions — all in one place.
         </p>
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <article className="rounded-2xl border border-border bg-background/50 p-4">
-            <h2 className="font-mono text-base font-semibold text-foreground">Workflow</h2>
+            <h2 className="font-mono text-base font-semibold text-foreground">How it works</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Search a course, pick a section, review overlap and workload, then ask the assistant to refine your plan.
+              Search courses, pick sections, review schedule conflicts and workload — then ask the AI assistant to refine your plan based on your constraints.
             </p>
           </article>
           <article className="rounded-2xl border border-border bg-background/50 p-4">
             <h2 className="font-mono text-base font-semibold text-foreground">AI Assistance</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              The assistant receives your selected classes and time constraints so it can suggest realistic schedule
-              improvements.
+              Powered by Groq + LLaMA 3.3. The assistant knows your schedule, blocked times, and professor ratings so it can give actually useful advice.
             </p>
           </article>
+        </div>
+      </section>
+
+      <section className="rounded-3xl border border-border bg-card/70 p-6 md:p-8">
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-byu-light">Built by</p>
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {CREATORS.map((person) => (
+            <div key={person.name} className="flex items-center gap-4 rounded-2xl border border-border bg-background/50 p-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-byu-royal/10 text-byu-royal font-mono font-bold text-lg">
+                {person.name[0]}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-foreground">{person.name}</p>
+                <div className="mt-1.5 flex items-center gap-3">
+                  <a
+                    href={`https://github.com/${person.github}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Github className="size-3.5" />
+                    {person.github}
+                  </a>
+                  <a
+                    href={person.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-byu-royal transition-colors"
+                  >
+                    <Linkedin className="size-3.5" />
+                    LinkedIn
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </main>

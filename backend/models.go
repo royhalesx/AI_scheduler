@@ -90,8 +90,11 @@ type ScheduleItem struct {
 }
 
 type ChatRequest struct {
-	Message         string         `json:"message" binding:"required"`
-	Term            string         `json:"term" binding:"required"`
-	CurrentSchedule []ScheduleItem `json:"currentSchedule"`
-	Constraints     Constraints    `json:"constraints"`
+	Message               string         `json:"message" binding:"required"`
+	Term                  string         `json:"term" binding:"required"`
+	CurrentSchedule       []ScheduleItem `json:"currentSchedule"`
+	Constraints           Constraints    `json:"constraints"`
+	Major                 string         `json:"major"`
+	CompletedCourses      []string       `json:"completedCourses"`
+	RemainingRequirements []string       `json:"remainingRequirements"`
 }

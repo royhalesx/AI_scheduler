@@ -113,6 +113,65 @@ func (s *appState) getProfessor(c *gin.Context) {
 }
 
 // ---------------------------------------------------------------------------
+// POST /api/schedule/export?term=20265
+// Body: [{"courseId":"CS 235","sectionId":"001"}, ...]
+// ---------------------------------------------------------------------------
+
+type ExportedCourse struct {
+	CourseID   string    `json:"courseId"`
+	CourseName string    `json:"courseName"`
+	Section    string    `json:"section"`
+	CRN        string    `json:"crn"`
+	Instructor string    `json:"instructor"`
+	Credits    float64   `json:"credits"`
+	Meetings   []Meeting `json:"meetings"`
+}
+
+func (s *appState) exportSchedule(c *gin.Context) {
+	termData, ok := s.resolveTerm(c)
+	if !ok {
+		return
+	}
+
+	var items []ScheduleItem
+	if err := c.ShouldBindJSON(&items); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "body must be [{courseId, sectionId}]"})
+		return
+	}
+
+	var result []ExportedCourse
+	for _, item := range items {
+		course, exists := termData.Courses[item.CourseID]
+		if !exists {
+			continue
+		}
+
+		sec, ok := course.Sections[item.SectionID]
+		if !ok {
+			// fall back to first section
+			for id, s := range course.Sections {
+				item.SectionID = id
+				sec = s
+				break
+			}
+		}
+
+		result = append(result, ExportedCourse{
+			CourseID:   item.CourseID,
+			CourseName: course.Title,
+			Section:    item.SectionID,
+			CRN:        sec.CRN,
+			Instructor: sec.Instructor,
+			Credits:    course.Credits,
+			Meetings:   sec.Meetings,
+		})
+	}
+
+	c.Header("Content-Disposition", `attachment; filename="schedule.json"`)
+	c.JSON(http.StatusOK, result)
+}
+
+// ---------------------------------------------------------------------------
 // POST /api/chat  (SSE streaming)
 // ---------------------------------------------------------------------------
 
@@ -149,7 +208,24 @@ func (s *appState) chat(c *gin.Context) {
 	scheduleJSON, _ := json.MarshalIndent(req.CurrentSchedule, "", "  ")
 	constraintsJSON, _ := json.MarshalIndent(req.Constraints, "", "  ")
 
+	major := req.Major
+	if major == "" {
+		major = "Not specified"
+	}
+	completedStr := "None"
+	if len(req.CompletedCourses) > 0 {
+		completedStr = strings.Join(req.CompletedCourses, ", ")
+	}
+	remainingStr := "Not specified"
+	if len(req.RemainingRequirements) > 0 {
+		remainingStr = strings.Join(req.RemainingRequirements, ", ")
+	}
+
 	userMessage := fmt.Sprintf(`Student question: %s
+
+Major: %s
+Completed courses: %s
+Still needed for graduation: %s
 
 Current schedule:
 %s
@@ -163,6 +239,9 @@ Term: %s
 
 Answer using ONLY the course data in the RETRIEVED COURSE CONTEXT above for specific facts (times, ratings, seat availability, instructor names). You may use your general knowledge about BYU academics, degree requirements, and course difficulty for broader advice.`,
 		req.Message,
+		major,
+		completedStr,
+		remainingStr,
 		string(scheduleJSON),
 		string(constraintsJSON),
 		termData.Term,

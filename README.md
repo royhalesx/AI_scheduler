@@ -1,8 +1,8 @@
-# BYU Scheduler — Backend
+# BYU Scheduler
 
-Go API server powering BYU Scheduler, a GT Scheduler-style course planning app for BYU students.
+GT Scheduler-style course planning app for BYU students with AI-powered advising. Built for the Weber State AI Hackathon (April 4, 2026).
 
-The backend does three things: scrapes BYU course data, serves it via a REST API, and provides AI-powered schedule advising using RAG (Retrieval-Augmented Generation).
+**Creators:** [Ben Jensen](https://github.com/jenbensen17) · [Roy Hales](https://github.com/royhalesx)
 
 **Production URL:** https://byu-scheduler.fly.dev
 
@@ -67,16 +67,17 @@ All endpoints are prefixed with `/api`. Course endpoints require `?term=<yearter
 |--------|------|-------------|
 | GET | `/api/health` | Health check — returns `{"status":"ok"}` |
 | GET | `/api/terms` | All available terms and metadata |
-| GET | `/api/courses?term=20263` | All courses for a term; filter with `&department=CS` |
-| GET | `/api/courses/:id?term=20263` | Single course — use `CS-235` format (dash, not space) |
+| GET | `/api/courses?term=20265` | All courses for a term; filter with `&department=CS` |
+| GET | `/api/courses/:id?term=20265` | Single course — use `CS-235` format (dash, not space) |
 | GET | `/api/professors/:name` | RMP data for an instructor |
 | POST | `/api/chat` | AI schedule advisor — SSE streaming |
+| POST | `/api/schedule/export?term=20265` | Export built schedule as JSON |
 
 ### Chat request body
 ```json
 {
   "message": "Which CS 235 section has the best professor?",
-  "term": "20263",
+  "term": "20265",
   "currentSchedule": [
     { "courseId": "CS 235", "sectionId": "001" }
   ],
@@ -84,11 +85,24 @@ All endpoints are prefixed with `/api`. Course endpoints require `?term=<yearter
     "blockedTimes": [{ "days": ["T", "Th"], "startTime": "08:00", "endTime": "10:00" }],
     "maxCredits": 16,
     "preferredDaysOff": ["F"]
-  }
+  },
+  "major": "Computer Science",
+  "completedCourses": ["CS 111", "CS 235"],
+  "remainingRequirements": ["CS 236", "CS 240", "CS 312"]
 }
 ```
 
-`message` and `term` are required. `currentSchedule` and `constraints` are optional.
+`message` and `term` are required. All other fields are optional. `major`, `completedCourses`, and `remainingRequirements` are injected into the AI prompt to prevent re-suggesting completed courses and to prioritize graduation requirements.
+
+### Schedule export request body
+```json
+[
+  { "courseId": "CS 235", "sectionId": "001" },
+  { "courseId": "MATH 112", "sectionId": "002" }
+]
+```
+
+Returns an array of `ExportedCourse` objects with `courseId`, `courseName`, `section`, `crn`, `instructor`, `credits`, and `meetings`.
 
 ### Chat SSE response
 ```
@@ -113,10 +127,12 @@ When the AI recommends schedule changes, a JSON action block is embedded in the 
 
 ```bash
 # Run from repo root, in order:
-python scraper/scrape_courses.py          # scrapes BYU class schedule
+python scraper/scrape_courses.py          # scrapes BYU class schedule (all terms)
 python scraper/scrape_rmp.py              # scrapes RateMyProfessors
-python scraper/merge_data.py --term 20263 # merges everything into backend/data/
+python scraper/merge_data.py --term 20265 # merges everything into backend/data/
 ```
+
+Yearterm codes: `YYYYT` where T=1 (Winter), 2 (Spring), 3 (Summer), 4 (Fall). Current terms: `20265` (Fall 2026), `20263` (Spring 2026).
 
 After updating data, rebuild the embedding index:
 ```bash
@@ -175,18 +191,37 @@ On initial deploy the volume is empty. `start.sh` detects this and seeds `course
 ```
 backend/
 ├── main.go         # startup, data loading, routing, CORS
-├── handlers.go     # all API handlers + Groq SSE streaming
+├── handlers.go     # all API handlers + Groq SSE streaming + schedule export
 ├── rag.go          # Voyage embedding build/load/retrieve pipeline
 ├── models.go       # all data types
 ├── Dockerfile      # multi-stage build (golang:1.18-alpine → alpine:3.19)
 ├── fly.toml        # Fly.io config — region, volume mount, health check
 ├── start.sh        # container entrypoint — seeds volume on first boot
 ├── data/
-│   ├── courses.json              # merged course + RMP data (frontend contract)
+│   ├── courses.json              # merged course + RMP data (all terms)
 │   ├── rmp.json                  # professor ratings
 │   └── embeddings_<term>.json   # RAG index (gitignored, lives on Fly volume)
 └── prompts/
     └── schedule_advisor.txt      # LLM system prompt
+
+frontend/
+├── src/
+│   ├── App.jsx                   # root layout, schedule state, React Router
+│   ├── components/
+│   │   ├── ScheduleGrid          # visual weekly calendar
+│   │   ├── AIChatPanel           # SSE streaming chat, parses action blocks
+│   │   ├── CourseSearch          # search/filter courses
+│   │   ├── SectionPicker         # section selection modal
+│   │   ├── WorkloadMeter         # credit + hour totals
+│   │   └── MajorTrackerPanel     # requirement checklist (requirements[] prop)
+│   ├── hooks/
+│   │   ├── useCourses            # fetches + filters courses from API
+│   │   └── useChat               # manages SSE chat connection
+│   └── lib/
+│       ├── api.ts                # API client
+│       └── scheduleUtils.ts      # conflict detection, workload estimation
+└── public/
+    └── logo.png                  # BYU Cougars logo (favicon + header)
 
 scraper/
 ├── scrape_courses.py   # BYU class schedule scraper

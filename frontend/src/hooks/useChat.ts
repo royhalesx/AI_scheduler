@@ -17,7 +17,7 @@ interface UseChatResult {
   messages: ChatMessage[]
   isSending: boolean
   error: string | null
-  sendMessage: (message: string, term: string, schedule: ScheduledCourse[], constraints: ConstraintBlock[]) => Promise<void>
+  sendMessage: (message: string, term: string, schedule: ScheduledCourse[], constraints: ConstraintBlock[], major?: string, completedCourses?: string[], remainingRequirements?: string[]) => Promise<void>
   clearMessages: () => void
 }
 
@@ -99,6 +99,9 @@ export function useChat(onScheduleUpdate?: (payload: ScheduleUpdatePayload) => v
     term: string,
     schedule: ScheduledCourse[],
     constraints: ConstraintBlock[],
+    major = '',
+    completedCourses: string[] = [],
+    remainingRequirements: string[] = [],
   ): Promise<void> => {
     if (!message.trim() || isSending) {
       return
@@ -137,7 +140,12 @@ export function useChat(onScheduleUpdate?: (payload: ScheduleUpdatePayload) => v
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, term, currentSchedule, constraints: constraintsPayload }),
+        body: JSON.stringify({
+          message, term, currentSchedule, constraints: constraintsPayload,
+          major,
+          completedCourses,
+          remainingRequirements,
+        }),
       })
 
       if (!response.ok) {

@@ -32,8 +32,10 @@ pnpm preview   # preview production build
 pip install -r scraper/requirements.txt
 python scraper/scrape_courses.py          # → scraper/output/courses_raw_<yearterm>.json
 python scraper/scrape_rmp.py              # → scraper/output/rmp.json
-python scraper/merge_data.py --term 20263 # → backend/data/courses.json + rmp.json
+python scraper/merge_data.py --term 20265 # → backend/data/courses.json + rmp.json
 ```
+
+Yearterm codes: `YYYYT` — T=1 (Winter), 2 (Spring), 3 (Summer), 4 (Fall). Current: `20265` (Fall 2026), `20263` (Spring 2026).
 
 ### Fly.io deployment (from `backend/`)
 ```bash
@@ -59,19 +61,20 @@ RateMyProfessors   → scrape_rmp.py      → scraper/output/rmp.json           
 Embedding indexes (`data/embeddings_<yearterm>.json`) are built once with `--reindex` and loaded on subsequent starts. On Fly.io these live on a persistent volume at `/app/data/`.
 
 ### API endpoints
-All routes under `/api`. Course endpoints require `?term=<yearterm>` (e.g. `?term=20263`).
+All routes under `/api`. Course endpoints require `?term=<yearterm>` (e.g. `?term=20265`).
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/health` | `{"status":"ok"}` |
 | `GET` | `/api/terms` | All available term codes + metadata |
-| `GET` | `/api/courses?term=20263[&department=CS]` | Courses for a term, optional dept filter |
-| `GET` | `/api/courses/:id?term=20263` | Single course (`CS-235` format, dash not space) |
+| `GET` | `/api/courses?term=20265[&department=CS]` | Courses for a term, optional dept filter |
+| `GET` | `/api/courses/:id?term=20265` | Single course (`CS-235` format, dash not space) |
 | `GET` | `/api/professors/:name` | RMP lookup by instructor name (exact then partial match) |
 | `POST` | `/api/chat` | SSE streaming AI response (`text/event-stream`) |
+| `POST` | `/api/schedule/export?term=20265` | Export selected schedule as JSON; body: `[{courseId, sectionId}]` |
 
 ### AI chat flow (`POST /api/chat`)
-Request body: `message` + `term` (required); `currentSchedule` + `constraints` (optional).
+Request body: `message` + `term` (required); `currentSchedule`, `constraints`, `major`, `completedCourses`, `remainingRequirements` (optional).
 
 1. Embed user query via **Voyage AI** `voyage-3-lite` (512 dims, `input_type: "query"`)
 2. Cosine similarity search against `EmbeddingIndex` → top-20 course IDs
@@ -88,16 +91,21 @@ The frontend parses action JSON blocks in the stream to auto-apply schedule chan
 - `BuildRAGContext` — formats retrieved courses into the context block injected into the LLM prompt
 
 ### Frontend components (`frontend/src/`)
-- `App.jsx` — root layout, schedule state, routing
+- `App.jsx` — root layout, schedule state, React Router (`/` main, `/about` About page)
 - `components/ScheduleGrid` — visual weekly calendar of selected courses
 - `components/AIChatPanel` — SSE streaming chat, parses action blocks to mutate schedule
 - `components/CourseSearch` — search/filter courses by name or department
 - `components/SectionPicker` — select section from multiple offerings
 - `components/WorkloadMeter` — total credits + estimated weekly hours
+- `components/MajorTrackerPanel` — requirement checklist; receives `requirements[]` prop (placeholder until Gen Ed JSON ready)
 - `hooks/useCourses` — fetches + filters courses from API
 - `hooks/useChat` — manages SSE chat connection
 - `lib/api.ts` — API client
 - `lib/scheduleUtils.ts` — conflict detection, workload estimation
+
+Right panel has two tabs: **AI Assistant** and **My Progress** (MajorTrackerPanel).
+
+`frontend/public/logo.png` — BYU Cougars logo, used as favicon and header logo. Tab title: "BYU Scheduler".
 
 ### Deployment
 - Multi-stage Docker build (`golang:1.18-alpine` → `alpine:3.19`), bundles `prompts/` and default data files
@@ -114,12 +122,12 @@ VOYAGE_API_KEY=...    # Voyage voyage-3-lite embeddings (free tier, requires cre
 
 ## Key data schemas
 
-**`courses.json`** — multi-term, keyed by yearterm:
+**`courses.json`** — multi-term, keyed by yearterm (e.g. `"20265"` for Fall 2026, `"20263"` for Spring 2026):
 ```json
 {
-  "20263": {
-    "term": "Spring 2026",
-    "yearterm": "20263",
+  "20265": {
+    "term": "Fall 2026",
+    "yearterm": "20265",
     "updatedAt": "...",
     "courses": {
       "CS 235": {

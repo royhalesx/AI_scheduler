@@ -2,7 +2,7 @@ import { SendHorizonal, Trash2, Undo2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@/hooks/useChat'
 
-export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onRevertSchedule }) {
+export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onRevertSchedule, major = '', completedCourses = [], remainingRequirements = [] }) {
   const [message, setMessage] = useState('')
   const { messages, sendMessage, isSending, error, clearMessages } = useChat(onScheduleUpdate)
   const scrollRef = useRef(null)
@@ -18,7 +18,7 @@ export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onR
     const trimmed = message.trim()
     if (!trimmed) return
     setMessage('')
-    await sendMessage(trimmed, term, schedule, constraints)
+    await sendMessage(trimmed, term, schedule, constraints, major, completedCourses, remainingRequirements)
   }
 
   const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant')

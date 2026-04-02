@@ -108,6 +108,7 @@ func main() {
 		api.GET("/courses/:id", state.getCourse)
 		api.GET("/professors/:name", state.getProfessor)
 		api.POST("/chat", state.chat)
+		api.POST("/schedule/export", state.exportSchedule)
 	}
 
 	addr := ":" + *port
