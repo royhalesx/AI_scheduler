@@ -163,9 +163,10 @@ export function useChat(onScheduleUpdate?: (payload: ScheduleUpdatePayload) => v
 
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
+        if (value) buffer += decoder.decode(value, { stream: true })
+        if (done) buffer += '\n' // flush any unterminated final line
+
         const lines = buffer.split('\n')
         buffer = lines.pop() ?? ''
 
@@ -200,6 +201,7 @@ export function useChat(onScheduleUpdate?: (payload: ScheduleUpdatePayload) => v
             // ignore malformed SSE lines
           }
         }
+        if (done) break
       }
     } catch {
       const fallbackMessage =

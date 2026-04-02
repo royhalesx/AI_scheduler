@@ -24,8 +24,8 @@ func main() {
 		// Try cwd
 		_ = godotenv.Load(".env")
 	}
-	if os.Getenv("GROQ_API_KEY") == "" {
-		log.Fatal("GROQ_API_KEY not set — add it to backend/.env")
+	if os.Getenv("GEMINI_API_KEY") == "" {
+		log.Fatal("GEMINI_API_KEY not set — add it to backend/.env")
 	}
 	if os.Getenv("VOYAGE_API_KEY") == "" {
 		log.Fatal("VOYAGE_API_KEY not set — add it to backend/.env")

@@ -17,7 +17,7 @@ import (
 const (
 	embeddingModel   = "voyage-3-lite"
 	embeddingDims    = 512
-	topK             = 20
+	topK             = 8
 	embeddingDelay   = 250 * time.Millisecond // ~240 req/min, well under Voyage free tier (300 RPM)
 	maxRetries       = 5
 	maxTokensPerRun  = 5_000_000 // hard abort at 5M tokens (~12x a full reindex); free tier is 200M/month
@@ -26,6 +26,28 @@ const (
 // ---------------------------------------------------------------------------
 // Text generation for embedding
 // ---------------------------------------------------------------------------
+
+// to12h converts "HH:MM" (24-hour) to "H:MM AM/PM" (12-hour).
+func to12h(t string) string {
+	parts := strings.SplitN(t, ":", 2)
+	if len(parts) != 2 {
+		return t
+	}
+	var h, m int
+	fmt.Sscanf(parts[0], "%d", &h)
+	fmt.Sscanf(parts[1], "%d", &m)
+	suffix := "AM"
+	if h >= 12 {
+		suffix = "PM"
+		if h > 12 {
+			h -= 12
+		}
+	}
+	if h == 0 {
+		h = 12
+	}
+	return fmt.Sprintf("%d:%02d %s", h, m, suffix)
+}
 
 // courseToText builds a rich human-readable description of a course for embedding.
 func courseToText(id string, course Course) string {
@@ -51,10 +73,10 @@ func courseToText(id string, course Course) string {
 				start := "TBA"
 				end := "TBA"
 				if m.StartTime != nil {
-					start = *m.StartTime
+					start = to12h(*m.StartTime)
 				}
 				if m.EndTime != nil {
-					end = *m.EndTime
+					end = to12h(*m.EndTime)
 				}
 				meetingParts = append(meetingParts, fmt.Sprintf("%s %s-%s at %s", days, start, end, m.Location))
 			}
@@ -273,16 +295,35 @@ func Retrieve(queryVec []float32, index EmbeddingIndex, k int) []string {
 
 // BuildRAGContext formats retrieved courses as a structured context block for the prompt.
 func BuildRAGContext(courseIDs []string, courses map[string]Course) string {
+	return BuildRAGContextWithPinned(nil, courseIDs, courses)
+}
+
+// BuildRAGContextWithPinned puts pinnedIDs first (always included, e.g. the
+// student's current schedule), then appends ragIDs skipping any duplicates.
+func BuildRAGContextWithPinned(pinnedIDs []string, ragIDs []string, courses map[string]Course) string {
 	var sb strings.Builder
 	sb.WriteString("--- RETRIEVED COURSE CONTEXT ---\n\n")
 
-	for _, id := range courseIDs {
+	seen := make(map[string]bool)
+
+	writeID := func(id string) {
+		if seen[id] {
+			return
+		}
 		course, ok := courses[id]
 		if !ok {
-			continue
+			return
 		}
+		seen[id] = true
 		sb.WriteString(courseToText(id, course))
 		sb.WriteString("\n")
+	}
+
+	for _, id := range pinnedIDs {
+		writeID(id)
+	}
+	for _, id := range ragIDs {
+		writeID(id)
 	}
 
 	sb.WriteString("--- END CONTEXT ---")

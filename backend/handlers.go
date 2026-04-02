@@ -9,9 +9,75 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+// ---------------------------------------------------------------------------
+// Per-IP rate limiter (rolling 60-second window)
+// ---------------------------------------------------------------------------
+
+const maxChatRequestsPerMinutePerIP = 8
+
+type ipRateLimiter struct {
+	mu      sync.Mutex
+	windows map[string][]time.Time
+}
+
+var chatLimiter = &ipRateLimiter{windows: make(map[string][]time.Time)}
+
+func init() {
+	// Periodically clean up stale entries to prevent unbounded memory growth.
+	go func() {
+		for {
+			time.Sleep(5 * time.Minute)
+			chatLimiter.mu.Lock()
+			cutoff := time.Now().Add(-time.Minute)
+			for ip, times := range chatLimiter.windows {
+				filtered := times[:0]
+				for _, t := range times {
+					if t.After(cutoff) {
+						filtered = append(filtered, t)
+					}
+				}
+				if len(filtered) == 0 {
+					delete(chatLimiter.windows, ip)
+				} else {
+					chatLimiter.windows[ip] = filtered
+				}
+			}
+			chatLimiter.mu.Unlock()
+		}
+	}()
+}
+
+// allow returns true if the IP is within its rate limit, false if exceeded.
+func (r *ipRateLimiter) allow(ip string) bool {
+	now := time.Now()
+	cutoff := now.Add(-time.Minute)
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	times := r.windows[ip]
+	// Drop timestamps outside the rolling window.
+	valid := times[:0]
+	for _, t := range times {
+		if t.After(cutoff) {
+			valid = append(valid, t)
+		}
+	}
+
+	if len(valid) >= maxChatRequestsPerMinutePerIP {
+		r.windows[ip] = valid
+		return false
+	}
+
+	r.windows[ip] = append(valid, now)
+	return true
+}
 
 // appState holds all in-memory data shared across handlers.
 type appState struct {
@@ -176,6 +242,15 @@ func (s *appState) exportSchedule(c *gin.Context) {
 // ---------------------------------------------------------------------------
 
 func (s *appState) chat(c *gin.Context) {
+	// Rate-limit per client IP.
+	ip := c.ClientIP()
+	if !chatLimiter.allow(ip) {
+		c.JSON(http.StatusTooManyRequests, gin.H{
+			"error": "You've sent a lot of messages — give it a minute and try again.",
+		})
+		return
+	}
+
 	var req ChatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -194,12 +269,50 @@ func (s *appState) chat(c *gin.Context) {
 		return
 	}
 
-	// 2. Retrieve top-K relevant courses
+	// 2. Retrieve top-K relevant courses, always pinning the student's current schedule
+	// and any single-course graduation requirements (so the AI has section data for them).
+	pinnedIDs := make([]string, 0, len(req.CurrentSchedule)+10)
+	for _, item := range req.CurrentSchedule {
+		pinnedIDs = append(pinnedIDs, item.CourseID)
+	}
+	// Extract course IDs from remaining requirements to pin in RAG context.
+	// Single-option entries: e.g. "CS 235 (Major, 3cr)" → pin "CS 235"
+	// Multi-option GE entries: e.g. "... GE [ART 101/MUSIC 101/...] (3cr)" → pin first 3 options
+	const maxPinnedReqs = 20
+	pinnedReqCount := 0
+	for _, remaining := range req.RemainingRequirements {
+		if pinnedReqCount >= maxPinnedReqs {
+			break
+		}
+		if start := strings.Index(remaining, "["); start >= 0 {
+			end := strings.Index(remaining, "]")
+			if end > start {
+				options := strings.Split(remaining[start+1:end], "/")
+				for i, opt := range options {
+					if i >= 3 {
+						break
+					}
+					opt = strings.TrimSpace(opt)
+					if opt != "" {
+						pinnedIDs = append(pinnedIDs, opt)
+						pinnedReqCount++
+					}
+				}
+			}
+			continue
+		}
+		// Course ID is everything before the first " ("
+		if idx := strings.Index(remaining, " ("); idx > 0 {
+			pinnedIDs = append(pinnedIDs, remaining[:idx])
+			pinnedReqCount++
+		}
+	}
+
 	index, hasIndex := s.indexes[req.Term]
 	var ragContext string
 	if hasIndex {
 		topIDs := Retrieve(queryVec, index, topK)
-		ragContext = BuildRAGContext(topIDs, termData.Courses)
+		ragContext = BuildRAGContextWithPinned(pinnedIDs, topIDs, termData.Courses)
 	} else {
 		ragContext = "No embedding index available for this term."
 	}
@@ -214,7 +327,13 @@ func (s *appState) chat(c *gin.Context) {
 	}
 	completedStr := "None"
 	if len(req.CompletedCourses) > 0 {
-		completedStr = strings.Join(req.CompletedCourses, ", ")
+		const maxCompleted = 50
+		if len(req.CompletedCourses) <= maxCompleted {
+			completedStr = strings.Join(req.CompletedCourses, ", ")
+		} else {
+			completedStr = strings.Join(req.CompletedCourses[:maxCompleted], ", ") +
+				fmt.Sprintf(" … and %d more (treat all as completed)", len(req.CompletedCourses)-maxCompleted)
+		}
 	}
 	remainingStr := "Not specified"
 	if len(req.RemainingRequirements) > 0 {
@@ -230,14 +349,14 @@ Still needed for graduation: %s
 Current schedule:
 %s
 
-Constraints:
+Constraints (blocked times use 24-hour format, e.g. "14:00" = 2:00 PM):
 %s
 
 Term: %s
 
-%s
+Use ONLY the course data in the RETRIEVED COURSE CONTEXT below for specific facts (times, ratings, seat availability, instructor names). Use general knowledge for degree requirements and broader advice.
 
-Answer using ONLY the course data in the RETRIEVED COURSE CONTEXT above for specific facts (times, ratings, seat availability, instructor names). You may use your general knowledge about BYU academics, degree requirements, and course difficulty for broader advice.`,
+%s`,
 		req.Message,
 		major,
 		completedStr,
@@ -254,7 +373,7 @@ Answer using ONLY the course data in the RETRIEVED COURSE CONTEXT above for spec
 	c.Header("X-Accel-Buffering", "no")
 
 	c.Stream(func(w io.Writer) bool {
-		err := streamGroq(s.systemPrompt, userMessage, w)
+		err := streamGemini(s.systemPrompt, userMessage, w)
 		if err != nil {
 			fmt.Fprintf(w, "data: {\"type\":\"error\",\"content\":%q}\n\n", err.Error())
 		}
@@ -264,30 +383,32 @@ Answer using ONLY the course data in the RETRIEVED COURSE CONTEXT above for spec
 }
 
 // ---------------------------------------------------------------------------
-// Groq streaming chat (OpenAI-compatible API)
+// Gemini streaming chat (OpenAI-compatible API)
 // ---------------------------------------------------------------------------
 
-const groqModel = "llama-3.3-70b-versatile"
+const geminiModel = "gemini-2.5-flash"
+const geminiBaseURL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 
-type groqRequest struct {
-	Model     string         `json:"model"`
-	MaxTokens int            `json:"max_tokens"`
-	Messages  []groqMessage  `json:"messages"`
-	Stream    bool           `json:"stream"`
+type geminiRequest struct {
+	Model     string          `json:"model"`
+	MaxTokens int             `json:"max_tokens"`
+	Messages  []geminiMessage `json:"messages"`
+	Stream    bool            `json:"stream"`
 }
 
-type groqMessage struct {
+type geminiMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
-func streamGroq(systemPrompt, userMessage string, w io.Writer) error {
-	apiKey := os.Getenv("GROQ_API_KEY")
+func streamGemini(systemPrompt, userMessage string, w io.Writer) error {
+	apiKey := os.Getenv("GEMINI_API_KEY")
 
-	reqBody := groqRequest{
-		Model:     groqModel,
-		MaxTokens: 2048,
-		Messages: []groqMessage{
+	reqBody := geminiRequest{
+		Model:     geminiModel,
+		// Generous limit so multi-course explanations + JSON action block are not truncated mid-sentence.
+		MaxTokens: 8192,
+		Messages: []geminiMessage{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: userMessage},
 		},
@@ -298,7 +419,7 @@ func streamGroq(systemPrompt, userMessage string, w io.Writer) error {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, "https://api.groq.com/openai/v1/chat/completions", bytes.NewReader(bodyBytes))
+	req, err := http.NewRequest(http.MethodPost, geminiBaseURL, bytes.NewReader(bodyBytes))
 	if err != nil {
 		return err
 	}
@@ -313,42 +434,48 @@ func streamGroq(systemPrompt, userMessage string, w io.Writer) error {
 
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("Groq API error %d: %s", resp.StatusCode, string(b))
+		return fmt.Errorf("Gemini API error %d: %s", resp.StatusCode, string(b))
 	}
 
-	// Parse OpenAI-compatible SSE stream and re-emit as our SSE format
-	scanner := bufio.NewScanner(resp.Body)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if !strings.HasPrefix(line, "data: ") {
-			continue
-		}
-		data := strings.TrimPrefix(line, "data: ")
-		if data == "[DONE]" || data == "" {
-			continue
+	// Parse OpenAI-compatible SSE stream and re-emit as our SSE format.
+	// Use ReadString, not bufio.Scanner — Scanner's default max line size (64KiB) can abort on large chunks.
+	br := bufio.NewReader(resp.Body)
+	for {
+		rawLine, readErr := br.ReadString('\n')
+		line := strings.TrimSuffix(strings.TrimSuffix(rawLine, "\r\n"), "\n")
+		line = strings.TrimSuffix(line, "\r")
+
+		if strings.HasPrefix(line, "data: ") {
+			data := strings.TrimPrefix(line, "data: ")
+			if data != "" && data != "[DONE]" {
+				var chunk struct {
+					Choices []struct {
+						Delta struct {
+							Content string `json:"content"`
+						} `json:"delta"`
+					} `json:"choices"`
+				}
+				if jsonErr := json.Unmarshal([]byte(data), &chunk); jsonErr == nil {
+					if len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Content != "" {
+						outChunk, _ := json.Marshal(map[string]string{
+							"type":    "text",
+							"content": chunk.Choices[0].Delta.Content,
+						})
+						fmt.Fprintf(w, "data: %s\n\n", outChunk)
+					}
+				}
+			}
 		}
 
-		var chunk struct {
-			Choices []struct {
-				Delta struct {
-					Content string `json:"content"`
-				} `json:"delta"`
-			} `json:"choices"`
-		}
-		if err := json.Unmarshal([]byte(data), &chunk); err != nil {
-			continue
-		}
-
-		if len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Content != "" {
-			outChunk, _ := json.Marshal(map[string]string{
-				"type":    "text",
-				"content": chunk.Choices[0].Delta.Content,
-			})
-			fmt.Fprintf(w, "data: %s\n\n", outChunk)
+		if readErr != nil {
+			if readErr == io.EOF {
+				break
+			}
+			return readErr
 		}
 	}
 
-	return scanner.Err()
+	return nil
 }
 
 // ---------------------------------------------------------------------------

@@ -95,7 +95,7 @@ Request body: `message` + `term` (required); `currentSchedule`, `constraints`, `
 1. Embed user query via **Voyage AI** `voyage-3-lite` (512 dims, `input_type: "query"`)
 2. Cosine similarity search against `EmbeddingIndex` → top-20 course IDs
 3. Build prompt: system prompt (`backend/prompts/schedule_advisor.txt`) + RAG context + user message + schedule/constraints
-4. Stream response from **Groq** `llama-3.3-70b-versatile` as SSE events
+4. Stream response from **Cerebras** `llama-3.3-70b` as SSE events
 
 SSE format: `data: {"type": "text"|"error"|"done", "content": "..."}`
 
@@ -148,7 +148,7 @@ Right panel has two tabs: **AI Assistant** and **My Progress** (MajorTrackerPane
 
 `backend/.env` (local) / Fly secrets (production):
 ```
-GROQ_API_KEY=...      # Groq llama-3.3-70b-versatile (free)
+GEMINI_API_KEY=...    # Google Gemini 2.0 Flash (free tier: 1,500 req/day, 1M tokens/day)
 VOYAGE_API_KEY=...    # Voyage voyage-3-lite embeddings (free tier, requires credit card)
 ```
 

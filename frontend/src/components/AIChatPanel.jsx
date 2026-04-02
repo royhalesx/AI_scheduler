@@ -1,5 +1,6 @@
 import { SendHorizonal, Trash2, Undo2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useChat } from '@/hooks/useChat'
 
 export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onRevertSchedule, major = '', completedCourses = [], remainingRequirements = [] }) {
@@ -49,7 +50,27 @@ export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onR
                   : 'bg-byu-royal text-white'
                 }`}
             >
-              {chatMessage.content || <span className="animate-pulse text-muted-foreground/60">▍</span>}
+              {chatMessage.role === 'assistant' ? (
+                chatMessage.content
+                  ? (
+                    // While tokens stream in, avoid ReactMarkdown — partial `|` text is parsed as GFM tables and looks like garbage.
+                    isSending && index === lastAssistantIndex
+                      ? <div className="whitespace-pre-wrap">{chatMessage.content}</div>
+                      : <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                            ul: ({ children }) => <ul className="my-1 ml-4 list-disc space-y-0.5">{children}</ul>,
+                            ol: ({ children }) => <ol className="my-1 ml-4 list-decimal space-y-0.5">{children}</ol>,
+                            li: ({ children }) => <li className="leading-snug">{children}</li>,
+                            strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                            code: ({ children }) => <code className="rounded bg-secondary px-1 py-0.5 font-mono text-xs">{children}</code>,
+                          }}
+                        >{chatMessage.content}</ReactMarkdown>
+                    )
+                  : <span className="animate-pulse text-muted-foreground/60">▍</span>
+              ) : (
+                chatMessage.content
+              )}
             </div>
             {chatMessage.role === 'assistant' && index === lastAssistantIndex && onRevertSchedule && (
               <button
