@@ -95,13 +95,15 @@ The frontend parses action JSON blocks in the stream to auto-apply schedule chan
 - `components/ScheduleGrid` — visual weekly calendar of selected courses
 - `components/AIChatPanel` — SSE streaming chat, parses action blocks to mutate schedule
 - `components/CourseSearch` — search/filter courses by name or department
-- `components/SectionPicker` — select section from multiple offerings
+- `components/SectionDropdown` — select section from multiple offerings
 - `components/WorkloadMeter` — total credits + estimated weekly hours
-- `components/MajorTrackerPanel` — requirement checklist; receives `requirements[]` prop (placeholder until Gen Ed JSON ready)
+- `components/MajorTrackerPanel` — requirement checklist; props: `requirements[]`, `completedCourses`, `onToggleCompleted`, `onAddCourse`
+- `components/ProfessorCard` — RMP rating display card
 - `hooks/useCourses` — fetches + filters courses from API
 - `hooks/useChat` — manages SSE chat connection
 - `lib/api.ts` — API client
 - `lib/scheduleUtils.ts` — conflict detection, workload estimation
+- `lib/parseDegreeAudit.ts` — parses BYU degree audit PDFs (via `pdfjs-dist`) into `ParsedDegreeAudit`; handles multi-word dept codes and PDF spacing quirks
 
 Right panel has two tabs: **AI Assistant** and **My Progress** (MajorTrackerPanel).
 

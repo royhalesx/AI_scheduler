@@ -22,4 +22,179 @@ Found 181 departments
 [18/181] CANT (Cantonese)... 1 courses
 [19/181] CBE (Chemical and Biological Engineering)... 31 courses
 [20/181] CCE (Civil and Construction Engineering)... 11 courses
-[21/181] CE (Civil Engineering)... 
+[21/181] CE (Civil Engineering)... 78 courses
+[22/181] CEBU (Cebuano)... 1 courses
+[23/181] CELL (Cell Biology and Physiology)... 40 courses
+[24/181] CFM (Construction and Facilities Management)... 31 courses
+[25/181] CH EN (Chemical Engineering)... 4 courses
+[26/181] CHEM (Chemistry and Biochemistry)... 54 courses
+[27/181] CHIN (Chinese - Mandarin)... 27 courses
+[28/181] CL CV (Classical Civilization)... 5 courses
+[29/181] CLSCS (Classics)... 2 courses
+[30/181] CMLIT (Comparative Literature)... 12 courses
+[31/181] CMPST (Comparative Studies)... 5 courses
+[32/181] COMD (Communication Disorders)... 29 courses
+[33/181] COMMS (Communications)... 53 courses
+[34/181] CPSE (Counseling Psychology and Special Education)... 44 courses
+[35/181] CREOL (Haitian Creole)... 3 courses
+[36/181] CROAT (Croatian)... 1 courses
+[37/181] CSANM (Computer Science Animation)... 10 courses
+[38/181] CYBER (Cybersecurity )... 13 courses
+[39/181] DANCE (Dance)... 101 courses
+[40/181] DANSH (Danish)... 2 courses
+[41/181] DES (Design)... 47 courses
+[42/181] DESAN (Design - Animation)... 11 courses
+[43/181] DESGD (Design - Graphic Design)... 11 courses
+[44/181] DESIL (Design - Illustration)... 12 courses
+[45/181] DESPH (Design - Photography)... 8 courses
+[46/181] DESPX (Product & User Experience Design)... 7 courses
+[47/181] DIGHT (Digital Humanities and Technology)... 8 courses
+[48/181] DS (Data Science)... 7 courses
+[49/181] DUTCH (Dutch)... 2 courses
+[50/181] EC EN (Electrical and Computer Engineering)... 39 courses
+[51/181] ECE (Early Childhood Education)... 17 courses
+[52/181] ECON (Economics)... 25 courses
+[53/181] EDLF (Educational Leadership and Foundations)... 12 courses
+[54/181] EIME (Educational Inquiry, Measurement, and Evaluation)... 7 courses
+[55/181] EL ED (Elementary Education)... 15 courses
+[56/181] ELING (Applied English Linguistics)... 27 courses
+[57/181] ENGL (English)... 76 courses
+[58/181] ENT (Entrepreneurial Management)... 66 courses
+[59/181] EUROP (European Studies)... 4 courses
+[60/181] EXDM (Experience Design and Management)... 18 courses
+[61/181] EXSC (Exercise Sciences)... 39 courses
+[62/181] FHSS (Family, Home, and Social Sciences)... 5 courses
+[63/181] FIN (Finance)... 32 courses
+[64/181] FINN (Finnish)... 2 courses
+[65/181] FLANG (Foreign Language Courses)... 5 courses
+[66/181] FNART (Fine Arts)... 2 courses
+[67/181] FREN (French)... 30 courses
+[68/181] GCI (Global and Community Impact )... 11 courses
+[69/181] GEOG (Geography)... 29 courses
+[70/181] GEOL (Geological Sciences)... 24 courses
+[71/181] GERM (German)... 23 courses
+[72/181] GERO (Gerontology)... 1 courses
+[73/181] GES (Global Environmental Studies)... 2 courses
+[74/181] GREEK (Greek (Classical))... 22 courses
+[75/181] GSCM (Global Supply Chain Management)... 9 courses
+[76/181] GWS (Global Women's Studies)... 9 courses
+[77/181] HAWAI (Hawaiian)... 3 courses
+[78/181] HCOLL (Humanities College)... 3 courses
+[79/181] HEB (Hebrew)... 8 courses
+[80/181] HILIG (Ilonggo/Hiligaynon)... 1 courses
+[81/181] HINDI (Hindi)... 2 courses
+[82/181] HIST (History)... 98 courses
+[83/181] HL (Healthcare Leadership)... 12 courses
+[84/181] HLTH (Public Health)... 
+  getSections error for HLTH 313: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+49 courses
+[85/181] HMONG (Hmong)... 1 courses
+[86/181] HONRS (Honors Program)... 13 courses
+[87/181] HRM (Human Resource Management)... 8 courses
+[88/181] IAS (International and Area Studies)... 10 courses
+[89/181] ICLND (Icelandic)... 1 courses
+[90/181] ICS (International Cinema Studies)... 40 courses
+[91/181] IHUM (Interdisciplinary Humanities)... 17 courses
+[92/181] INDON (Indonesian)... 2 courses
+[93/181] IP&T (Instructional Psychology and Technology)... 32 courses
+[94/181] IS (Information Systems)... 270 courses
+[95/181] IT&C (Information Technology and Cybersecurity)... 0 courses
+[96/181] ITAL (Italian)... 18 courses
+[97/181] JAPAN (Japanese)... 28 courses
+[98/181] KHMER (khmer)... 1 courses
+[99/181] KICHE (K'iche)... 1 courses
+[100/181] KOREA (Korean)... 16 courses
+[101/181] LAO (Laotian)... 1 courses
+[102/181] LAS (Latin American Studies)... 4 courses
+[103/181] LATIN (Latin (Classical))... 24 courses
+[104/181] LAW (Law)... 63 courses
+[105/181] LFSCI (Life Sciences)... 9 courses
+[106/181] LING (Linguistics)... 
+  getSections error for LING 610: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+50 courses
+[107/181] M COM (Management Communication)... 4 courses
+[108/181] MALAG (Malagasy)... 1 courses
+[109/181] MALAY (Malay)... 1 courses
+[110/181] MATH (Mathematics)... 68 courses
+[111/181] MBA (Business Administration)... 35 courses
+[112/181] MDT (Music Dance Theatre)... 4 courses
+[113/181] ME EN (Mechanical Engineering)... 47 courses
+[114/181] MESA (Middle East Studies/Arabic)... 6 courses
+[115/181] MFGEN (Manufacturing Engineering)... 19 courses
+[116/181] MFHD (Marriage, Family, and Human Development)... 10 courses
+[117/181] MFT (Marriage and Family Therapy)... 16 courses
+[118/181] MIL S (Military Science)... 7 courses
+[119/181] MKTG (Marketing)... 16 courses
+[120/181] MMBIO (Microbiology and Molecular Biology)... 40 courses
+[121/181] MPA (Public Management)... 21 courses
+[122/181] MSB (Marriott School of Business)... 17 courses
+[123/181] MTHED (Mathematics Education)... 23 courses
+[124/181] MUSIC (Music)... 308 courses
+[125/181] NAVAJ (Navajo)... 1 courses
+[126/181] NDFS (Nutrition, Dietetics, and Food Science)... 42 courses
+[127/181] NE LG (Near Eastern Languages)... 2 courses
+[128/181] NEURO (Neuroscience)... 24 courses
+[129/181] NORWE (Norwegian)... 2 courses
+[130/181] NURS (Nursing)... 44 courses
+[131/181] PERSI (Persian)... 3 courses
+[132/181] PETE (Physical Education Teacher Education)... 12 courses
+[133/181] PHIL (Philosophy)... 33 courses
+[134/181] PHSCS (Physics and Astronomy)... 
+  getSections error for PHSCS 230: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+49 courses
+[135/181] PHY S (Physical Science)... 39 courses
+[136/181] PLANG (Professional Language)... 10 courses
+[137/181] POLI (Political Science)... 49 courses
+[138/181] POLSH (Polish)... 1 courses
+[139/181] PORT (Portuguese)... 25 courses
+[140/181] PSE (Public Service and Ethics )... 2 courses
+[141/181] PSYCH (Psychology)... 59 courses
+[142/181] PWS (Plant and Wildlife Sciences)... 49 courses
+[143/181] QUECH (Quechua)... 1 courses
+[144/181] REL A (Rel A - Ancient Scripture)... 16 courses
+[145/181] REL C (Rel C - Church History and Doctrine)... 18 courses
+[146/181] REL E (Rel E - Religious Education)... 10 courses
+[147/181] RUSS (Russian)... 15 courses
+[148/181] SAMOA (Samoan)... 3 courses
+[149/181] SC ED (Secondary Education)... 4 courses
+[150/181] SCAND (Scandinavian Studies)... 4 courses
+[151/181] SFL (School of Family Life)... 53 courses
+[152/181] SGAW (Sgaw Karen)... 1 courses
+[153/181] SLAT (Second Language Teaching)... 7 courses
+[154/181] SLOVK (Slovak)... 2 courses
+[155/181] SOC (Sociology)... 55 courses
+[156/181] SOC W (Social Work)... 18 courses
+[157/181] SPAN (Spanish)... 62 courses
+[158/181] SRBIA (Serbian)... 1 courses
+[159/181] STAC (Student Activities)... 24 courses
+[160/181] STAT (Statistics)... 42 courses
+[161/181] STDEV (Student Development)... 31 courses
+[162/181] STRAT (Strategic Management)... 16 courses
+[163/181] SWAHI (Swahili)... 2 courses
+[164/181] SWED (Swedish)... 3 courses
+[165/181] SWELL (Student Wellness)... 43 courses
+[166/181] T ED (Teacher Education)... 3 courses
+[167/181] TAGAL (Tagalog)... 3 courses
+[168/181] TEE (Technology and Engineering Education)... 3 courses
+[169/181] TELL (Teaching English Language Learners)... 3 courses
+[170/181] TES (Technology and Engineering Studies)... 24 courses
+[171/181] TEST (Test)... 23 courses
+[172/181] THAI (Thai)... 3 courses
+[173/181] TMA (Theatre and Media Arts)... 73 courses
+[174/181] TML (Teaching Multilingual Learners)... 5 courses
+[175/181] TONGA (Tongan)... 2 courses
+[176/181] TWI (Twi)... 2 courses
+[177/181] UKRAI (Ukrainian)... 1 courses
+[178/181] UNIV (University Requirements)... 19 courses
+[179/181] VIET (Vietnamese)... 2 courses
+[180/181] WELSH (Welsh)... 2 courses
+[181/181] WRTG (Writing)... 6 courses
+
+=== Summary ===
+Term: Fall 2026 (20265)
+Departments with courses: 180/181
+Total courses: 3011
+Total sections: 10453
+Errors: 3
+Output: /home/jenbensen/code-stuffs/Weber/AI_scheduler/scraper/output/courses_raw_20265.json
+Sections with no meeting times (TBA/online): 1766
