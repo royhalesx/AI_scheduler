@@ -137,6 +137,25 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
   const major = guessMajor(allLines)
   const totalCredits = guessTotalCredits(allLines)
 
+  // ── Format validation ──────────────────────────────────────────────────
+  // Require at least two of these BYU-specific fingerprints to be present
+  // in the extracted text before attempting any parsing.
+  const fullText = allLines.join('\n')
+  const FINGERPRINTS = [
+    /Requirements?\s*[—–]/i,          // "Requirements —" section headers
+    /\bDegree\s+(?:Audit|Progress)\b/i, // "Degree Audit" or "Degree Progress"
+    /\b(?:BYU|Brigham\s+Young\s+University)\b/i, // school name
+    /\bGPA\b/i,                        // GPA line appears in every progress report
+    /\bCredit\s+Hours?\b/i,            // credit hour totals
+  ]
+  const matched = FINGERPRINTS.filter(re => re.test(fullText)).length
+  if (matched < 2) {
+    throw new Error(
+      'This PDF does not appear to be a BYU degree progress report. ' +
+      'Please follow the instructions in the help panel to download your progress report from mymap.byu.edu.'
+    )
+  }
+
   // ── Section-by-section parsing ──────────────────────────────────────────
 
   const requirements: ParsedRequirement[] = []
@@ -164,13 +183,27 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
         .trim()
       if (/MINOR/i.test(trimmed)) cat += ' (Minor)'
       currentCategory = cat
-      inRequirementsSection = !/General Education/i.test(cat)
+      // Skip GE and Religion sections — already covered by geRequirements.ts
+      inRequirementsSection = !/General Education|^Religion$/i.test(cat)
       currentGroup = null
       continue
     }
 
-    // Only parse courses once we're inside a requirements section
-    if (!inRequirementsSection) continue
+    // In skipped sections (GE, Religion) we still want to capture completed
+    // courses so they get properly marked in the tracker.
+    if (!inRequirementsSection) {
+      // Look for "Completed COURSE_ID" pattern or a course with a grade
+      const geMatch = extractFirstCourse(line)
+      if (geMatch) {
+        const afterId = line.slice(geMatch.index + geMatch.fullMatch.length)
+        // Mark as completed if: preceded by "Completed", has a grade, or "In Progress"
+        const beforeId = line.slice(0, geMatch.index)
+        if (/Completed/i.test(beforeId) || COMPLETED_GRADE_RE.test(afterId) || /In Progress/i.test(afterId)) {
+          completedCourses.add(geMatch.courseId)
+        }
+      }
+      continue
+    }
 
     // ── Sub-Requirement Header ─────────────────────────────────────────
     const subReqMatch = trimmed.match(SUB_REQ_RE)
@@ -252,5 +285,28 @@ export async function parseDegreeAudit(file: File): Promise<ParsedDegreeAudit> {
   // Filter out any groups that ended up with 0 options
   const validRequirements = requirements.filter(r => r.options.length > 0)
 
-  return { major, totalCredits, requirements: validRequirements, completedCourses: [...completedCourses] }
+  // Deduplicate requirement groups that share the same label+category.
+  // BYU progress reports can emit the same section (e.g. "Religion Requirements") multiple
+  // times (once for completed, once for planned/not-completed), which produces
+  // duplicate sub-requirement entries. Merge them by combining options lists.
+  const mergedMap = new Map<string, ParsedRequirement>()
+  for (const req of validRequirements) {
+    const key = `${req.category}|||${req.label}`
+    const existing = mergedMap.get(key)
+    if (existing) {
+      // Merge options, avoiding duplicate course IDs
+      const existingIds = new Set(existing.options.map(o => o.id))
+      for (const opt of req.options) {
+        if (!existingIds.has(opt.id)) {
+          existing.options.push(opt)
+          existingIds.add(opt.id)
+        }
+      }
+    } else {
+      mergedMap.set(key, { ...req, options: [...req.options] })
+    }
+  }
+  const deduplicatedRequirements = [...mergedMap.values()]
+
+  return { major, totalCredits, requirements: deduplicatedRequirements, completedCourses: [...completedCourses] }
 }

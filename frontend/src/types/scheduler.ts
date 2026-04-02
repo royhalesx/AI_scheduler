@@ -82,6 +82,7 @@ export interface RequirementGroup {
   label: string     // display name, e.g. "Arts", "Data Structures"
   category: string  // section header for accordion grouping
   credits: number
+  creditPerOption?: number  // default credits per option when stored as plain strings
   options: string[] // course IDs that satisfy this slot (single-element for major reqs)
   source: 'ge' | 'major'
 }

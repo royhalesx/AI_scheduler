@@ -1,7 +1,6 @@
 import path from "path"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
-import checker from "vite-plugin-checker"
 import { defineConfig, type Plugin } from "vite"
 
 /**
@@ -99,11 +98,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    checker({
-      typescript: {
-        tsconfigPath: "./tsconfig.app.json",
-      },
-    }),
+    // TypeScript checker disabled in dev: path resolution fails on X: (WSL/mapped drive).
+    // Type errors are still caught by `tsc` during `npm run build`.
+    // checker({ typescript: { tsconfigPath: "./tsconfig.app.json" } }),
     appifexErrorReporter(),
   ],
   resolve: {

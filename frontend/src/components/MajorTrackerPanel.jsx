@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronDown, Circle, Plus, Upload, Loader2 } from 'lucide-react'
+import { CheckCircle2, ChevronDown, Circle, Plus, Upload, Loader2, HelpCircle, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 export function MajorTrackerPanel({
@@ -8,10 +8,12 @@ export function MajorTrackerPanel({
   onToggleCompleted,
   onAddCourse,
   onUploadAudit,
+  onRemoveProgress,
 }) {
   const [openCategories, setOpenCategories] = useState(new Set())
   const [expandedOptions, setExpandedOptions] = useState(new Set())
   const [isParsing, setIsParsing] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const fileInputRef = useRef(null)
 
   const toggleCategory = (cat) => {
@@ -48,7 +50,8 @@ export function MajorTrackerPanel({
   const getOptionCredits = (opt) => typeof opt === 'string' ? 3 : opt.credits
 
   const getReqProgress = (req) => {
-    if (req.source === 'ge') {
+    if (req.source === 'ge' && req.credits <= 3) {
+      // Single-course GE slot — any one completed option satisfies it
       const doneOpt = req.options.find(opt => completedSet.has(getOptionId(opt)))
       return {
         isDone: !!doneOpt,
@@ -57,8 +60,9 @@ export function MajorTrackerPanel({
       }
     } else {
       const doneOpts = req.options.filter(opt => completedSet.has(getOptionId(opt)))
-      let sumCr = doneOpts.reduce((sum, opt) => sum + getOptionCredits(opt), 0)
-      
+      const fallbackCr = req.creditPerOption ?? 3
+      let sumCr = doneOpts.reduce((sum, opt) => sum + (typeof opt === 'string' ? fallbackCr : getOptionCredits(opt)), 0)
+
       const reqCr = req.credits || 0
       let isDone = false
       if (req.options.length === 1 && doneOpts.length === 1) {
@@ -105,9 +109,18 @@ export function MajorTrackerPanel({
       {/* Upload prompt for major requirements */}
       {!majorLoaded && (
         <div className="shrink-0 mb-3 rounded-xl border border-dashed border-border bg-secondary/30 p-3">
-          <p className="text-xs font-semibold text-foreground mb-1">Upload Degree Audit</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold text-foreground">Upload Degree Progress</p>
+            <button
+              onClick={() => setShowHelp(true)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              title="How to find your degree progress"
+            >
+              <HelpCircle className="size-4" />
+            </button>
+          </div>
           <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
-            Upload your BYU degree audit PDF to track major requirements and get smarter AI suggestions.
+            Upload your BYU degree progress PDF to track major requirements and get smarter AI suggestions.
           </p>
           <input
             ref={fileInputRef}
@@ -275,7 +288,7 @@ export function MajorTrackerPanel({
 
       {/* Re-upload link if major is already loaded */}
       {majorLoaded && (
-        <div className="shrink-0 pt-2 text-center">
+        <div className="shrink-0 pt-2 flex flex-col items-center gap-1">
           <input
             ref={fileInputRef}
             type="file"
@@ -289,8 +302,59 @@ export function MajorTrackerPanel({
             onClick={() => fileInputRef.current?.click()}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
           >
-            {isParsing ? 'Parsing…' : 'Re-upload degree audit'}
+            {isParsing ? 'Parsing…' : 'Re-upload degree progress'}
           </button>
+          {onRemoveProgress && (
+            <button
+              type="button"
+              onClick={onRemoveProgress}
+              className="text-xs text-red-400 hover:text-red-500 transition-colors"
+            >
+              Remove progress
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-xl shadow-lg p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-sm">How to get your Degree Progress PDF</h3>
+              <button
+                onClick={() => setShowHelp(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Step 1: Go to <a href="https://mymap.byu.edu/" target="_blank" rel="noreferrer" className="text-byu-royal underline hover:opacity-80">mymap.byu.edu</a> and navigate to the Progress Report page.</p>
+                <div className="w-full rounded-lg overflow-hidden border border-border">
+                  <img src="/myMap.png" alt="Step 1" className="w-full h-auto object-cover" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Step 2: Click <strong>Generate Report</strong>, then save or print it as a PDF and upload it here.</p>
+                <div className="w-full rounded-lg overflow-hidden border border-border">
+                  <img src="/generateReport.png" alt="Step 2" className="w-full h-auto object-cover" />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 pt-4 border-t border-border flex justify-end">
+              <button
+                onClick={() => setShowHelp(false)}
+                className="bg-byu-royal text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-byu-blue transition-colors"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

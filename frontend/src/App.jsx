@@ -136,19 +136,29 @@ function SchedulerHome() {
   }, [allRequirements, completedSet])
 
   const handleDegreeAuditUpload = async (file) => {
-    const result = await parseDegreeAudit(file)
-    setMajorName(result.major)
-    setMajorRequirements(result.requirements.map((r, idx) => ({
-      id: r.id || `major-req-${idx}`,
-      label: r.label,
-      category: r.category,
-      credits: r.credits,
-      source: 'major',
-      options: r.options,
-    })))
-    if (result.completedCourses?.length > 0) {
-      setCompletedCourses(prev => [...new Set([...prev, ...result.completedCourses])])
+    try {
+      const result = await parseDegreeAudit(file)
+      setMajorName(result.major)
+      setMajorRequirements(result.requirements.map((r, idx) => ({
+        id: r.id || `major-req-${idx}`,
+        label: r.label,
+        category: r.category,
+        credits: r.credits,
+        source: 'major',
+        options: r.options,
+      })))
+      if (result.completedCourses?.length > 0) {
+        setCompletedCourses(prev => [...new Set([...prev, ...result.completedCourses])])
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to parse the PDF. Please try again.')
     }
+  }
+
+  const handleRemoveDegreeProgress = () => {
+    setMajorRequirements(null)
+    setMajorName('')
+    setCompletedCourses([])
   }
 
   // Hide completed courses from search results
@@ -441,6 +451,7 @@ function SchedulerHome() {
                   if (course) handleAddCourse(course)
                 }}
                 onUploadAudit={handleDegreeAuditUpload}
+                onRemoveProgress={handleRemoveDegreeProgress}
               />
             )}
           </div>
