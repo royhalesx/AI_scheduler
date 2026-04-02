@@ -83,12 +83,23 @@ export function SchedulerHome() {
     ...(majorRequirements ?? []),
   ], [majorRequirements])
 
-  const remainingRequirements = useMemo(() => {
+  const remainingMajorRequirements = useMemo(() => {
     return allRequirements
-      .filter(r => !r.options.some(id => completedSet.has(id)))
-      .map(r => r.options.length === 1
-        ? `${r.options[0]} (${r.category}, ${r.credits}cr)`
-        : `${r.label} GE [${r.options.join('/')}] (${r.credits}cr)`
+      .filter(r => r.source === 'major' && !r.options.some(id => completedSet.has(id)))
+      .map((r) =>
+        r.options.length === 1
+          ? `${r.options[0]} (${r.category}, ${r.credits}cr)`
+          : `${r.label} [${r.options.join('/')}] (${r.credits}cr)`,
+      )
+  }, [allRequirements, completedSet])
+
+  const remainingGERequirements = useMemo(() => {
+    return allRequirements
+      .filter(r => r.source === 'ge' && !r.options.some(id => completedSet.has(id)))
+      .map((r) =>
+        r.options.length === 1
+          ? `${r.options[0]} (${r.category}, ${r.credits}cr)`
+          : `${r.label} GE [${r.options.join('/')}] (${r.credits}cr)`,
       )
   }, [allRequirements, completedSet])
 
@@ -387,7 +398,8 @@ export function SchedulerHome() {
                 onRevertSchedule={preAiSchedule ? handleRevertSchedule : null}
                 major={majorName}
                 completedCourses={[...completedSet]}
-                remainingRequirements={remainingRequirements}
+                remainingMajorRequirements={remainingMajorRequirements}
+                remainingGERequirements={remainingGERequirements}
               />
             ) : (
               <MajorTrackerPanel

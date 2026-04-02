@@ -3,7 +3,17 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@/hooks/useChat'
 
-export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onRevertSchedule, major = '', completedCourses = [], remainingRequirements = [] }) {
+export function AIChatPanel({
+  term,
+  schedule,
+  constraints,
+  onScheduleUpdate,
+  onRevertSchedule,
+  major = '',
+  completedCourses = [],
+  remainingMajorRequirements = [],
+  remainingGERequirements = [],
+}) {
   const [message, setMessage] = useState('')
   const { messages, sendMessage, isSending, error, clearMessages } = useChat(onScheduleUpdate)
   const scrollRef = useRef(null)
@@ -19,7 +29,16 @@ export function AIChatPanel({ term, schedule, constraints, onScheduleUpdate, onR
     const trimmed = message.trim()
     if (!trimmed) return
     setMessage('')
-    await sendMessage(trimmed, term, schedule, constraints, major, completedCourses, remainingRequirements)
+    await sendMessage(
+      trimmed,
+      term,
+      schedule,
+      constraints,
+      major,
+      completedCourses,
+      remainingMajorRequirements,
+      remainingGERequirements,
+    )
   }
 
   const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant')

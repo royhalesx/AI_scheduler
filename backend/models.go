@@ -90,11 +90,13 @@ type ScheduleItem struct {
 }
 
 type ChatRequest struct {
-	Message               string         `json:"message" binding:"required"`
-	Term                  string         `json:"term" binding:"required"`
-	CurrentSchedule       []ScheduleItem `json:"currentSchedule"`
-	Constraints           Constraints    `json:"constraints"`
-	Major                 string         `json:"major"`
-	CompletedCourses      []string       `json:"completedCourses"`
-	RemainingRequirements []string       `json:"remainingRequirements"`
+	Message                     string         `json:"message" binding:"required"`
+	Term                        string         `json:"term" binding:"required"`
+	CurrentSchedule             []ScheduleItem `json:"currentSchedule"`
+	Constraints                 Constraints    `json:"constraints"`
+	Major                       string         `json:"major"`
+	CompletedCourses            []string       `json:"completedCourses"`
+	RemainingRequirements        []string `json:"remainingRequirements"`        // legacy: combined list
+	RemainingMajorRequirements   []string `json:"remainingMajorRequirements"` // from degree-audit major
+	RemainingGERequirements      []string `json:"remainingGERequirements"`      // static GE + religion
 }

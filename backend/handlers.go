@@ -275,12 +275,22 @@ func (s *appState) chat(c *gin.Context) {
 	for _, item := range req.CurrentSchedule {
 		pinnedIDs = append(pinnedIDs, item.CourseID)
 	}
+	majorIntent := messageAsksAboutMajor(req.Message)
+	hasSplit := len(req.RemainingMajorRequirements) > 0 || len(req.RemainingGERequirements) > 0
+	reqsToPin := req.RemainingRequirements
+	if hasSplit {
+		if majorIntent && len(req.RemainingMajorRequirements) > 0 {
+			reqsToPin = req.RemainingMajorRequirements
+		} else {
+			reqsToPin = append(append([]string{}, req.RemainingMajorRequirements...), req.RemainingGERequirements...)
+		}
+	}
 	// Extract course IDs from remaining requirements to pin in RAG context.
 	// Single-option entries: e.g. "CS 235 (Major, 3cr)" → pin "CS 235"
 	// Multi-option GE entries: e.g. "... GE [ART 101/MUSIC 101/...] (3cr)" → pin first 3 options
 	const maxPinnedReqs = 20
 	pinnedReqCount := 0
-	for _, remaining := range req.RemainingRequirements {
+	for _, remaining := range reqsToPin {
 		if pinnedReqCount >= maxPinnedReqs {
 			break
 		}
@@ -335,16 +345,44 @@ func (s *appState) chat(c *gin.Context) {
 				fmt.Sprintf(" … and %d more (treat all as completed)", len(req.CompletedCourses)-maxCompleted)
 		}
 	}
-	remainingStr := "Not specified"
-	if len(req.RemainingRequirements) > 0 {
-		remainingStr = strings.Join(req.RemainingRequirements, ", ")
+	var progressBlock string
+	if hasSplit {
+		reqMajor := "None on file — load a degree audit under My Progress for major-specific requirements."
+		if len(req.RemainingMajorRequirements) > 0 {
+			reqMajor = strings.Join(req.RemainingMajorRequirements, ", ")
+		}
+		reqGE := "None remaining."
+		if len(req.RemainingGERequirements) > 0 {
+			reqGE = strings.Join(req.RemainingGERequirements, ", ")
+		}
+		progressBlock = "Remaining MAJOR requirements (degree audit — NOT GE):\n" + reqMajor +
+			"\n\nRemaining GE / religion / university breadths:\n" + reqGE
+	} else if len(req.RemainingRequirements) > 0 {
+		progressBlock = "Still needed for graduation (combined — use each line's category to tell Major vs Religion vs GE):\n" +
+			strings.Join(req.RemainingRequirements, ", ")
+	} else {
+		progressBlock = "Still needed for graduation: Not specified"
+	}
+
+	focusLine := ""
+	if majorIntent {
+		if hasSplit {
+			focusLine = `
+
+**Mandatory focus for this question:** The student is asking about their MAJOR / degree program. Recommend only courses listed under "Remaining MAJOR requirements" (plus any prerequisite chain needed for those courses). Do not recommend GE, religion hours, or other breadth slots. If the major list is empty or says to upload an audit, tell them how to get major-specific advice — do not substitute a GE class.`
+		} else {
+			focusLine = `
+
+**Mandatory focus for this question:** The student is asking about their MAJOR. Recommend only courses in the combined list whose category indicates a major requirement (e.g. contains "Major" or matches their declared major field). Do not recommend Religion, Skills, GE, or similar breadth lines unless they explicitly asked about breadth/GE.`
+		}
 	}
 
 	userMessage := fmt.Sprintf(`Student question: %s
 
-Major: %s
+Major (declared): %s
 Completed courses: %s
-Still needed for graduation: %s
+
+%s
 
 Current schedule:
 %s
@@ -353,6 +391,7 @@ Constraints (blocked times use 24-hour format, e.g. "14:00" = 2:00 PM):
 %s
 
 Term: %s
+%s
 
 Use ONLY the course data in the RETRIEVED COURSE CONTEXT below for specific facts (times, ratings, seat availability, instructor names). Use general knowledge for degree requirements and broader advice.
 
@@ -360,10 +399,11 @@ Use ONLY the course data in the RETRIEVED COURSE CONTEXT below for specific fact
 		req.Message,
 		major,
 		completedStr,
-		remainingStr,
+		progressBlock,
 		string(scheduleJSON),
 		string(constraintsJSON),
 		termData.Term,
+		focusLine,
 		ragContext,
 	)
 
@@ -481,6 +521,31 @@ func streamGemini(systemPrompt, userMessage string, w io.Writer) error {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+func messageAsksAboutMajor(msg string) bool {
+	m := strings.ToLower(strings.TrimSpace(msg))
+	if m == "" {
+		return false
+	}
+	if strings.Contains(m, "major") {
+		return true
+	}
+	phrases := []string{
+		"my program",
+		"degree program",
+		"for my degree",
+		"in my degree",
+		"program requirement",
+		"what do i need for",
+		"requirements for my",
+	}
+	for _, p := range phrases {
+		if strings.Contains(m, p) {
+			return true
+		}
+	}
+	return false
+}
 
 func (s *appState) resolveTerm(c *gin.Context) (TermData, bool) {
 	return s.resolveTermByCode(c, c.Query("term"))
