@@ -7,12 +7,17 @@
     "default_popup": "index.html",
     "default_icon": "icon.png"
   },
+  "host_permissions": [
+  "http://localhost/*"
+  ],
+  "permissions": ["storage","tabs"],
   "content_scripts": [
     {
       "js": ["scripts/content.js", "scripts/popup.js"],
       "matches": [
         "https://commtech.byu.edu/*",
-        "https://developer.chrome.com/docs/extensions/*"
+        "https://developer.chrome.com/docs/extensions/*",
+        "http://localhost/*"
       ]
     }
   ],
