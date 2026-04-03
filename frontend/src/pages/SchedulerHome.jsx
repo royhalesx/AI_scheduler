@@ -19,6 +19,64 @@ import {
 
 const BLOCK_COLORS = ['#0072CE', '#A73A64', '#D14124', '#00966C', '#9E2A2B', '#72246C', '#44693D']
 
+const DAY_MAP = { M: 'MO', T: 'TU', W: 'WE', Th: 'TH', F: 'FR' }
+
+/** Returns the Monday that anchors the semester's first full week, used as DTSTART in recurring ICS events. */
+function semesterAnchorDate(yearterm) {
+  if (!yearterm || yearterm.length < 5) return '20260907'
+  const year = yearterm.slice(0, 4)
+  const t = yearterm.slice(4)
+  // Approximate first Monday of each BYU term
+  const anchors = { '1': `${year}0105`, '2': `${year}0420`, '3': `${year}0629`, '4': `${year}0907` }
+  return anchors[t] ?? `${year}0907`
+}
+
+function formatICSTime(timeStr) {
+  const [h, m] = timeStr.split(':')
+  return h.padStart(2, '0') + (m ?? '00').padStart(2, '0') + '00'
+}
+
+function buildICS(schedule, yearterm, termLabel) {
+  const anchor = semesterAnchorDate(yearterm)
+  const lines = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//BYU Scheduler//EN',
+    'CALSCALE:GREGORIAN',
+    'X-WR-CALNAME:BYU Schedule' + (termLabel ? ` – ${termLabel}` : ''),
+  ]
+  for (const item of schedule) {
+    for (const meeting of item.section.meetings) {
+      if (!meeting.startTime || !meeting.endTime || !meeting.days?.length) continue
+      const byDay = meeting.days.map((d) => DAY_MAP[d]).filter(Boolean).join(',')
+      if (!byDay) continue
+      const tStart = formatICSTime(meeting.startTime)
+      const tEnd = formatICSTime(meeting.endTime)
+      lines.push('BEGIN:VEVENT')
+      lines.push(`SUMMARY:${item.courseId} – ${item.title}`)
+      lines.push(`DTSTART;TZID=America/Denver:${anchor}T${tStart}`)
+      lines.push(`DTEND;TZID=America/Denver:${anchor}T${tEnd}`)
+      lines.push(`RRULE:FREQ=WEEKLY;BYDAY=${byDay};COUNT=15`)
+      lines.push(`LOCATION:${meeting.location ?? ''}`)
+      lines.push(`DESCRIPTION:Instructor: ${item.section.instructor ?? ''}\\nSection: ${item.section.id}\\nCRN: ${item.section.crn ?? ''}`)
+      lines.push('END:VEVENT')
+    }
+  }
+  lines.push('END:VCALENDAR')
+  return lines.join('\r\n')
+}
+
+function downloadICS(schedule, yearterm, termLabel) {
+  const content = buildICS(schedule, yearterm, termLabel)
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'byu-schedule.ics'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 function loadJson(key, fallback) {
   try {
     const v = localStorage.getItem(key)
@@ -124,7 +182,12 @@ export function SchedulerHome() {
   }, [yearterm])
 
   useEffect(() => {
-    if (yearterm) localStorage.setItem(`byu_schedule_${yearterm}`, JSON.stringify(schedule))
+    if (yearterm) {
+      localStorage.setItem(`byu_schedule_${yearterm}`, JSON.stringify(schedule))
+      // Fixed keys for the browser extension — always reflects the active term
+      localStorage.setItem('byu_active_schedule', JSON.stringify(schedule))
+      localStorage.setItem('byu_active_yearterm', yearterm)
+    }
   }, [schedule, yearterm])
   useEffect(() => {
     if (yearterm) localStorage.setItem(`byu_constraints_${yearterm}`, JSON.stringify(constraints))
@@ -349,7 +412,17 @@ export function SchedulerHome() {
             <section className="rounded-2xl border border-border/90 bg-card/80 p-4 shadow-sm backdrop-blur-sm">
               <div className="mb-2 flex items-center justify-between">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">My Schedule</p>
-                <span className="font-mono text-xs font-semibold text-byu-light">{totalCredits} cr</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => downloadICS(schedule, yearterm, term)}
+                    title="Export to calendar (.ics)"
+                    className="text-muted-foreground/60 transition-colors hover:text-byu-light"
+                  >
+                    <CalendarDays className="size-3.5" />
+                  </button>
+                  <span className="font-mono text-xs font-semibold text-byu-light">{totalCredits} cr</span>
+                </div>
               </div>
               <ul className="space-y-1">
                 {schedule.map((item) => {
