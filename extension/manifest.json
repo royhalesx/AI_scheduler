@@ -7,10 +7,16 @@
     "default_popup": "index.html",
     "default_icon": "icon.png"
   },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module" 
+  },
   "host_permissions": [
-  "http://localhost/*"
+  "http://localhost/*",
+  "https://byu-scheduler.vercel.app/*",
+  "http://byu-scheduler.fly.dev/*"
   ],
-  "permissions": ["storage","tabs"],
+  "permissions": ["storage","tabs", "scripting"],
   "content_scripts": [
     {
       "js": ["scripts/content.js", "scripts/popup.js"],
@@ -18,7 +24,8 @@
         "https://commtech.byu.edu/*",
         "https://developer.chrome.com/docs/extensions/*",
         "http://localhost/*",
-        "https://byu-scheduler.vercel.app/"
+        "https://byu-scheduler.vercel.app/*",
+        "http://byu-scheduler.fly.dev/*"
       ]
     }
   ],

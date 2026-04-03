@@ -1,5 +1,6 @@
 let byuConnection = false;
-
+const startApply = 0;
+const continueApply = 1;
 
 // TODO: Change when deployed (e.g., "your-app-name.herokuapp.com") and update manifest
 const websiteURL = "byu-scheduler.vercel";
@@ -18,9 +19,16 @@ let classes = [
           { 
             catalog_number: "CS 235", 
             instructor: "Crandall", 
-            days: "MWF", 
+            days: "MW", 
             start: "2p",
             end: "3:15p"
+          },
+          { 
+            catalog_number: "MATH 112", 
+            instructor: "Dorff", 
+            days: "MWF", 
+            start: "9a",
+            end: "9:50a"
           }
         ];
 let term = "Fall"; //fetch this too I guess
@@ -94,7 +102,7 @@ function showImportPopup() {
 
   // Event Listeners
   document.getElementById("import-btn").addEventListener("click", () => {
-    handleScheduleImport(0);
+    handleScheduleImport(startApply);
     overlay.remove();
   });
 
@@ -110,39 +118,54 @@ function showImportPopup() {
 
 
 async function handleScheduleDownload() {
-  console.log("Attempting to fetch schedule");
+ const statusEl = document.getElementById('status');
+  statusEl.textContent = 'Grabbing local schedule...';
+
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     
-    if (!tab || !tab.url.includes(websiteURL)) {
-      console.warn("User is not on the AI Scheduler website.");
+    // Ensure we are on the AI site
+    if (!tab.url.includes("byu-scheduler")) {
+      statusEl.textContent = 'Switch to the AI Scheduler tab!';
       return;
     }
 
-    try {
-      const response = await fetch(`http://${websiteURL}:8000/api/schedule/export`);
-      
-      if (!response.ok) throw new Error("Server error");
+    // 1. Scrape the localStorage directly
+    const [{ result }] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        const rawSchedule = JSON.parse(localStorage.getItem('byu_active_schedule') ?? '[]');
+        return rawSchedule.map(item => ({
+          // Map their keys to EXACTLY what your content.js expects:
+          catalog_number: item.catalog_number || item.courseId, 
+          instructor: item.instructor,
+          days: item.days,
+          start: item.start,
+          end: item.end
+        }));
+      },
+    });
+    console.log(result)
 
-      const data = await response.json();
-      
-      // Save to local variable
-      classes = data;
-
-      // Save to Google Local Storage for the content script to use later
-      await chrome.storage.local.set({ "savedClasses": data });
-      
-      console.log("✅ Schedule downloaded and saved to storage:", data);
-
-    } catch (fetchError) {
-      console.error("Fetch failed:", fetchError);
+    if (!result || result.length === 0) {
+      statusEl.textContent = 'No classes found in browser storage.';
+      return;
     }
 
+    // 2. Save directly to Extension Storage
+    await chrome.storage.local.set({ 
+      "savedClasses": result, 
+      "savedIndex": 0 
+    });
+
+    statusEl.textContent = `✅ ${result.length} Classes Loaded Locally!`;
+    console.log("Direct Sync Successful:", result);
+
   } catch (err) {
-    console.error("Critical error in handleScheduleDownload:");
+    console.error("Local sync failed:", err);
+    statusEl.textContent = 'Sync Error: ' + err.message;
   }
 }
-
 //  IMPORT THE SCHEDULE
 
 
@@ -165,9 +188,9 @@ const waitForSelector = (selector, timeout = 5000) => {
 
 
 
-async function handleScheduleImport(classIndex) {
+async function handleScheduleImport(indexMode) {
+ 
   //STEP 1: ensure the user is on the correct page if they are not on add a course redirect them
-
   const currentUrl = window.location.href;
   let sectionIndex = 0;
   // 1. Check if we are on a CommTech site
@@ -175,6 +198,12 @@ async function handleScheduleImport(classIndex) {
     console.log("You are not on the scheduling website.");
     return;
   }
+
+  //If it is the correct website cache the indexMode
+   if(indexMode == startApply){
+    await chrome.storage.local.set({ "savedIndex": indexMode });
+  }
+
 
   // 2. Check and Redirect if necessary
   if (!currentUrl.includes("/register/addACourse")) {
@@ -188,6 +217,11 @@ async function handleScheduleImport(classIndex) {
   //STEP 2: Get data from local storage
 
   // const result = await chrome.storage.local.get("savedClasses");
+  //classes = result;
+  const indexResult = await chrome.storage.local.get("savedIndex");
+  const classIndex = indexResult.savedIndex;
+  console.log("Index of :" + classIndex)
+
   // const classes = result.savedClasses;
 
   //if I can't find classes then there is no need to do anything.
@@ -327,8 +361,6 @@ async function handleScheduleImport(classIndex) {
       if (columns.length >= 3) {
         const instructorText = columns[0].innerText;
         const scheduleText = columns[2].innerText; // The third child
-        console.log("Instructor: " + instructorText)
-        console.log("Schedule: " + scheduleText)
 
         // 2. Verify Instructor and Time Match
         if (instructorText.includes(currentClass.instructor) && scheduleText.includes(currentClass.days) && scheduleText.includes(currentClass.start)&& scheduleText.includes(currentClass.end)) {
@@ -390,12 +422,39 @@ try {
 } catch (err) {
     console.error("Failed to add course to cart:", err);
 }
+  //Save next index:
+    await chrome.storage.local.set({ "savedIndex": classIndex+1 });
+
 
   //STEP 7: redirect back to schedulebuilder page and loop through the next class
   await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: Replace 
-    window.location.href = currentUrl + "register/addACourse";
 
-  handleScheduleImport(classIndex++);
+
+  try {
+    // 1. Find the specific dropdown trigger that contains a term name
+    const back = document.querySelectorAll('.customButtonText');
+    let backBtn;
+    back.forEach(element => {
+      if(element.innerText.includes("Back")){
+        backBtn = element;
+      }
+    });
+ if (backBtn) {
+        console.log("backBtn found inside section. Clicking...");
+        
+        // 2. Perform the established click technique
+        backBtn.focus();
+        backBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        backBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        backBtn.click();
+        
+        console.log("✅ Course successfully added to cart!");
+    }
+  } catch (err) {
+    console.error("Term/Year selection failed:", err);
+  }
+
+  handleScheduleImport(continueApply);
 }
 
 
@@ -416,7 +475,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ byuConnection, hasSavedSchedule });
   }
   if (request.action === "applySchedule") {
-    handleScheduleImport(0); // Actually run the automation
+    handleScheduleImport(startApply); // Actually run the automation
   }
   if (request.action === "downloadSchedule") {
     handleScheduleDownload(); // Actually run the automation

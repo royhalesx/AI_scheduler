@@ -1,29 +1,44 @@
-chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
-  if (!tab.url) return;
+// // background.js
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//   console.log("Hi")
+//   if (request.action === "DOWNLOAD_SCHEDULE") {
+//     // We do the fetch here where it's safe and fast
+//    const yearterm = "20265"; 
 
-  const url = new URL(tab.url);
-  // Check if the user is on the specific BYU scheduling site
-  if (url.origin.includes("commtech")) {
-    await chrome.sidePanel.setOptions({
-      tabId,
-      path: 'index.html',
-      enabled: true
-    });
-    
-    // This automatically opens the side panel
-    chrome.sidePanel.open({ tabId });
-  } else {
-    // Disables the side panel for non-scheduling sites if desired
-    await chrome.sidePanel.setOptions({
-      tabId,
-      enabled: false
-    });
-  }
-});
+//     const demoClasses = [
+//   { courseId: "DUMMY_ID", sectionId: "DUMMY_SEC" }
+//   ];
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "open_side_panel") {
-    // 'sender.tab.id' tells Chrome which tab wants the panel opened
-    chrome.sidePanel.open({ tabId: sender.tab.id });
-  }
-});
+//   fetch(`https://byu-scheduler.fly.dev/api/schedule/export?term=${yearterm}`, {
+//     method: 'POST',
+//     headers: {
+//         'Content-Type': 'application/json',
+//         'Accept': 'application/json'
+//     },
+//     body: JSON.stringify(demoClasses)
+//   })
+//   .then(async (response) => {
+//     // Get the raw text first to see what's actually inside
+//     const rawText = await response.text();
+//     console.log("Raw Response from Server:", rawText);
+
+//     if (!response.ok) {
+//       throw new Error(`Server Error (${response.status}): ${rawText}`);
+//     }
+
+//     // Now try to parse it manually
+//     return JSON.parse(rawText);
+//   })
+//   .then(data => {
+//     console.log("Success:", data);
+//     chrome.storage.local.set({ "savedClasses": data, "savedIndex": 0 }, () => {
+//       sendResponse({ success: true });
+//     });
+//   })
+//   .catch(err => {
+//     console.error("Background Fetch Error:", err);
+//     sendResponse({ success: false, error: err.message });
+//   });
+//     return true; // Keeps the message channel open for the async fetch
+//   }
+// });
