@@ -29,3 +29,6 @@ Thumbs.db
 
 # Node Components
 frontend/node_modules
+
+node_modules
+

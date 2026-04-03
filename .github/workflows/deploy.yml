@@ -15,7 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+
+      - name: Validate Go build
+        run: go build ./...
+        working-directory: backend
+
+      - uses: superfly/flyctl-actions/setup-flyctl@v1
 
       - name: Deploy
         env:

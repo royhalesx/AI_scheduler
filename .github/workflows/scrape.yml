@@ -30,7 +30,7 @@ jobs:
       - name: Merge data
         # --term must match the current active yearterm
         # Update this when the term rolls over (e.g. 20263 → 20265)
-        run: python scraper/merge_data.py --term 20263
+        run: python scraper/merge_data.py --term 20265
 
       - name: Commit updated data
         run: |

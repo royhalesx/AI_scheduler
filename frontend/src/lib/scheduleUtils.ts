@@ -70,12 +70,18 @@ export function completedCourseCountsTowardRequirement(
   return om.get(n) === req.id
 }
 
+export interface RequirementProgressResult {
+  isDone: boolean
+  doneBy: string | null
+  completedCredits: number
+}
+
 /** Same completion rules as the My Progress tracker — needed for multi-course "pool" major reqs (e.g. complete 23 credits). */
 export function getRequirementProgress(
   req: RequirementGroup,
   completedCourseIds: string[],
   exclusiveContext?: ExclusiveCourseContext | null,
-) {
+): RequirementProgressResult {
   const completedSet = new Set(completedCourseIds.map((c) => normalizeCourseId(c)))
   const baseDone = (courseId: string) => completedSet.has(normalizeCourseId(courseId))
 
