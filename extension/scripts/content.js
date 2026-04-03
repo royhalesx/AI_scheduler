@@ -2,7 +2,7 @@ let byuConnection = false;
 
 
 // TODO: Change when deployed (e.g., "your-app-name.herokuapp.com") and update manifest
-const websiteURL = "localhost";
+const websiteURL = "byu-scheduler.vercel";
 
 
 // TODO: Data state change to null when deployed
@@ -167,6 +167,7 @@ const waitForSelector = (selector, timeout = 5000) => {
 
 async function handleScheduleImport(classIndex) {
   //STEP 1: ensure the user is on the correct page if they are not on add a course redirect them
+
   const currentUrl = window.location.href;
   let sectionIndex = 0;
   // 1. Check if we are on a CommTech site
@@ -190,7 +191,7 @@ async function handleScheduleImport(classIndex) {
   // const classes = result.savedClasses;
 
   //if I can't find classes then there is no need to do anything.
-  if (!classes || classes.length === 0) return;
+  if (!classes || classes.length === 0 || classIndex >= classes.length) return;
 
 
   //STEP 3: Change term to term fetched from the schedule builder
@@ -394,9 +395,7 @@ try {
   await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: Replace 
     window.location.href = currentUrl + "register/addACourse";
 
-      if(classIndex < classes.length){
-        handleScheduleImport(classIndex++);
-      }
+  handleScheduleImport(classIndex++);
 }
 
 

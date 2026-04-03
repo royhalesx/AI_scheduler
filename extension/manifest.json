@@ -17,7 +17,8 @@
       "matches": [
         "https://commtech.byu.edu/*",
         "https://developer.chrome.com/docs/extensions/*",
-        "http://localhost/*"
+        "http://localhost/*",
+        "https://byu-scheduler.vercel.app/"
       ]
     }
   ],
