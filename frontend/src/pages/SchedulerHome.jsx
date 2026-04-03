@@ -338,7 +338,10 @@ export function SchedulerHome() {
         <aside className="overflow-y-auto space-y-3">
           {schedule.length > 0 && (
             <section className="rounded-2xl border border-border/90 bg-card/80 p-4 shadow-sm backdrop-blur-sm">
-              <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">My Schedule</p>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">My Schedule</p>
+                <span className="font-mono text-xs font-semibold text-byu-light">{totalCredits} cr</span>
+              </div>
               <ul className="space-y-1">
                 {schedule.map((item) => {
                   const course = courseMap.get(item.courseId)

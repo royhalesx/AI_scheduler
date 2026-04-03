@@ -287,11 +287,11 @@ export function toggleConstraintBlock(
 /**
  * Estimates weekly hours per course using:
  *   - Actual contact hours (from meeting times)
- *   - Study hours = credits × multiplier, where multiplier scales with RMP difficulty:
- *       difficulty 1 (easy)   → 1.5 hrs/credit
- *       difficulty 3 (medium) → 2.5 hrs/credit
- *       difficulty 5 (hard)   → 3.5 hrs/credit
- *       no RMP data           → 2.25 hrs/credit (neutral default)
+ *   - Study hours = 2× contact × difficulty factor × course-level factor
+ *       difficulty 1 (easy)  → 0.8×    difficulty 5 (hard) → 1.6×    no RMP → 1.0×
+ *       100–200 level → 0.9×    300–400 level → 1.1×    500+ level → 1.3×
+ *
+ * Example: 3-credit MWF (2.5 contact hrs), 200-level, no RMP → 2.5 + 4.5 = 7.0 hrs/wk
  */
 export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
   const total = schedule.reduce((sum, item) => {
@@ -302,12 +302,19 @@ export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
     }, 0)
     const contactHours = contactMinutes / 60
 
-    const difficulty = item.section.rmp?.difficulty
-    const studyMultiplier = difficulty != null
-      ? 1.5 + (Math.min(5, Math.max(1, difficulty)) - 1) * 0.5
-      : 2.25
+    // Course level from number in courseId (e.g. "CS 235" → 235)
+    const courseNum = parseInt(item.courseId.match(/\d+/)?.[0] ?? '200', 10)
+    const levelFactor = courseNum >= 500 ? 1.3 : courseNum >= 300 ? 1.1 : 0.9
 
-    return sum + contactHours + item.credits * studyMultiplier
+    // Difficulty from RMP: 1=easy→0.8×, 3=medium→1.2×, 5=hard→1.6×; no data→1.0×
+    const difficulty = item.section.rmp?.difficulty
+    const diffFactor = difficulty != null
+      ? 0.8 + ((Math.min(5, Math.max(1, difficulty)) - 1) / 4) * 0.8
+      : 1.0
+
+    const studyHours = contactHours * 2.0 * diffFactor * levelFactor
+
+    return sum + contactHours + studyHours
   }, 0)
 
   return Number(total.toFixed(1))

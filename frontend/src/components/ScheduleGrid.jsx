@@ -16,8 +16,8 @@ const DAY_LABELS = {
   Sa: 'Sat',
 }
 
-const DEFAULT_START = 9 * 60   // 9:00 AM
-const DEFAULT_END   = 15 * 60  // 3:00 PM
+const DEFAULT_START = 8 * 60   // 8:00 AM
+const DEFAULT_END   = 17 * 60  // 5:00 PM
 const HARD_MIN      = 7 * 60   // 7:00 AM floor
 const HARD_MAX      = 22 * 60  // 10:00 PM ceiling
 const SLOT_MINUTES  = 60
@@ -162,7 +162,7 @@ export function ScheduleGrid({
             {timeSlots.map((time) => (
               <div
                 key={time}
-                className="h-20 border-b border-border/70 pr-2 text-right text-[10px] text-muted-foreground"
+                className="h-14 border-b border-border/70 pr-2 text-right text-[10px] text-muted-foreground"
               >
                 {formatTimeLabel(time)}
               </div>
@@ -191,7 +191,7 @@ export function ScheduleGrid({
                     onMouseEnter={() => {
                       if (isDragging) toggleBlock(day, time)
                     }}
-                    className={`block h-20 w-full cursor-pointer border-b border-border/60 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-byu-blue ${
+                    className={`block h-14 w-full cursor-pointer border-b border-border/60 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-byu-blue ${
                       isUnavailable ? 'bg-slate-500/30' : 'bg-transparent hover:bg-secondary/40'
                     }`}
                     aria-label={`Toggle unavailable time on ${DAY_LABELS[day]} at ${formatTimeLabel(time)}`}

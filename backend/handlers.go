@@ -288,7 +288,7 @@ func (s *appState) chat(c *gin.Context) {
 	// Extract course IDs from remaining requirements to pin in RAG context.
 	// Single-option entries: e.g. "CS 235 (Major, 3cr)" → pin "CS 235"
 	// Multi-option GE entries: e.g. "... GE [ART 101/MUSIC 101/...] (3cr)" → pin first 3 options
-	const maxPinnedReqs = 36
+	const maxPinnedReqs = 20
 	pinnedReqCount := 0
 	for _, remaining := range reqsToPin {
 		if pinnedReqCount >= maxPinnedReqs {
@@ -428,57 +428,77 @@ Use ONLY the course data in the RETRIEVED COURSE CONTEXT below for specific fact
 	c.Header("X-Accel-Buffering", "no")
 
 	c.Stream(func(w io.Writer) bool {
-		err := streamGemini(s.systemPrompt, userMessage, w)
+		flushFn := func() {}
+		if flusher, ok := w.(http.Flusher); ok {
+			flushFn = flusher.Flush
+		}
+		err := streamGemini(s.systemPrompt, userMessage, w, flushFn)
 		if err != nil {
 			fmt.Fprintf(w, "data: {\"type\":\"error\",\"content\":%q}\n\n", err.Error())
 		}
 		fmt.Fprintf(w, "data: {\"type\":\"done\"}\n\n")
+		flushFn()
 		return false
 	})
 }
 
 // ---------------------------------------------------------------------------
-// Gemini streaming chat (OpenAI-compatible API)
+// Gemini native streaming API (supports thinkingBudget to disable thinking)
 // ---------------------------------------------------------------------------
 
 const geminiModel = "gemini-2.5-flash"
-const geminiBaseURL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 
-type geminiRequest struct {
-	Model     string          `json:"model"`
-	MaxTokens int             `json:"max_tokens"`
-	Messages  []geminiMessage `json:"messages"`
-	Stream    bool            `json:"stream"`
+// Native Gemini request types
+type geminiNativeRequest struct {
+	Contents          []geminiContent          `json:"contents"`
+	SystemInstruction *geminiSystemInstruction `json:"systemInstruction,omitempty"`
+	GenerationConfig  geminiGenConfig          `json:"generationConfig"`
 }
 
-type geminiMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
+type geminiContent struct {
+	Role  string       `json:"role"`
+	Parts []geminiPart `json:"parts"`
 }
 
-func streamGemini(systemPrompt, userMessage string, w io.Writer) error {
+type geminiPart struct {
+	Text string `json:"text"`
+}
+
+type geminiSystemInstruction struct {
+	Parts []geminiPart `json:"parts"`
+}
+
+type geminiGenConfig struct {
+	MaxOutputTokens int `json:"maxOutputTokens"`
+}
+
+func streamGemini(systemPrompt, userMessage string, w io.Writer, flush func()) error {
 	apiKey := os.Getenv("GEMINI_API_KEY")
 
-	reqBody := geminiRequest{
-		Model:     geminiModel,
-		// Generous limit so multi-course explanations + JSON action block are not truncated mid-sentence.
-		MaxTokens: 8192,
-		Messages: []geminiMessage{
-			{Role: "system", Content: systemPrompt},
-			{Role: "user", Content: userMessage},
+	reqBody := geminiNativeRequest{
+		SystemInstruction: &geminiSystemInstruction{
+			Parts: []geminiPart{{Text: systemPrompt}},
 		},
-		Stream: true,
+		Contents: []geminiContent{
+			{Role: "user", Parts: []geminiPart{{Text: userMessage}}},
+		},
+		GenerationConfig: geminiGenConfig{
+			MaxOutputTokens: 8192,
+		},
 	}
 	bodyBytes, err := json.Marshal(reqBody)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, geminiBaseURL, bytes.NewReader(bodyBytes))
+	url := fmt.Sprintf(
+		"https://generativelanguage.googleapis.com/v1beta/models/%s:streamGenerateContent?alt=sse&key=%s",
+		geminiModel, apiKey,
+	)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(bodyBytes))
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
@@ -492,31 +512,38 @@ func streamGemini(systemPrompt, userMessage string, w io.Writer) error {
 		return fmt.Errorf("Gemini API error %d: %s", resp.StatusCode, string(b))
 	}
 
-	// Parse OpenAI-compatible SSE stream and re-emit as our SSE format.
-	// Use ReadString, not bufio.Scanner — Scanner's default max line size (64KiB) can abort on large chunks.
+	// Parse native Gemini SSE stream and re-emit as our SSE format.
+	// Parts with "thought: true" are internal reasoning — skip them.
 	br := bufio.NewReader(resp.Body)
 	for {
 		rawLine, readErr := br.ReadString('\n')
-		line := strings.TrimSuffix(strings.TrimSuffix(rawLine, "\r\n"), "\n")
-		line = strings.TrimSuffix(line, "\r")
+		line := strings.TrimSpace(rawLine)
 
 		if strings.HasPrefix(line, "data: ") {
 			data := strings.TrimPrefix(line, "data: ")
-			if data != "" && data != "[DONE]" {
+			if data != "" {
 				var chunk struct {
-					Choices []struct {
-						Delta struct {
-							Content string `json:"content"`
-						} `json:"delta"`
-					} `json:"choices"`
+					Candidates []struct {
+						Content struct {
+							Parts []struct {
+								Text    string `json:"text"`
+								Thought bool   `json:"thought"`
+							} `json:"parts"`
+						} `json:"content"`
+					} `json:"candidates"`
 				}
 				if jsonErr := json.Unmarshal([]byte(data), &chunk); jsonErr == nil {
-					if len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Content != "" {
-						outChunk, _ := json.Marshal(map[string]string{
-							"type":    "text",
-							"content": chunk.Choices[0].Delta.Content,
-						})
-						fmt.Fprintf(w, "data: %s\n\n", outChunk)
+					for _, candidate := range chunk.Candidates {
+						for _, part := range candidate.Content.Parts {
+							if !part.Thought && part.Text != "" {
+								outChunk, _ := json.Marshal(map[string]string{
+									"type":    "text",
+									"content": part.Text,
+								})
+								fmt.Fprintf(w, "data: %s\n\n", outChunk)
+								flush()
+							}
+						}
 					}
 				}
 			}

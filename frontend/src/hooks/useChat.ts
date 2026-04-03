@@ -40,11 +40,14 @@ type AiActionPayload = {
 }
 
 function parseScheduleUpdateFromResponse(content: string): ScheduleUpdatePayload | null {
-  const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```/i)
-  if (!jsonMatch) return null
+  // Try code-fenced JSON first, then fall back to bare JSON at end of response
+  const fencedMatch = content.match(/```json\s*([\s\S]*?)\s*```/i)
+  const bareMatch = content.match(/\n(\{[\s\S]*\})\s*$/s)
+  const jsonStr = fencedMatch?.[1] ?? bareMatch?.[1] ?? null
+  if (!jsonStr) return null
 
   try {
-    const parsed = JSON.parse(jsonMatch[1]) as AiActionPayload
+    const parsed = JSON.parse(jsonStr) as AiActionPayload
 
     // Handle {action, courses} format from the AI prompt
     if (parsed.action && parsed.courses) {
@@ -72,7 +75,13 @@ function parseScheduleUpdateFromResponse(content: string): ScheduleUpdatePayload
 }
 
 function stripJsonBlock(content: string): string {
-  return content.replace(/\n?```json[\s\S]*?```/gi, '').trim()
+  // Strip complete code-fenced JSON blocks
+  let cleaned = content.replace(/\n?```json[\s\S]*?```/gi, '')
+  // Strip incomplete fence still arriving mid-stream (no closing ```)
+  cleaned = cleaned.replace(/\n?```json[\s\S]*$/gi, '')
+  // Strip bare JSON action block only when our specific action keys are present
+  cleaned = cleaned.replace(/\n\{[\s\S]*?"(?:action|addSections|removeCourseIds)"[\s\S]*$/s, '')
+  return cleaned.trim()
 }
 
 const DEFAULT_MESSAGE: ChatMessage = {

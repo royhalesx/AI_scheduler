@@ -22,7 +22,7 @@ export function WorkloadMeter({ credits, workloadHours }) {
       </div>
 
       <p className="mt-2 text-sm text-muted-foreground">
-        Workload is estimated using data from Rate My Professor and credit count for each course.
+        Estimated using classroom time, course level, and RMP difficulty rating.
       </p>
     </div>
   )

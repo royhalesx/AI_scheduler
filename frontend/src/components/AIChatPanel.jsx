@@ -1,7 +1,14 @@
-import { SendHorizonal, Trash2, Undo2 } from 'lucide-react'
+import { SendHorizonal, Trash2, Undo2, Wand2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@/hooks/useChat'
+
+const EXAMPLE_PROMPTS = [
+  'Build me a full schedule for this term',
+  'What CS electives are available?',
+  'Add a GE writing course',
+  'Show courses with the best professor ratings',
+]
 
 export function AIChatPanel({
   term,
@@ -26,30 +33,42 @@ export function AIChatPanel({
     }
   }, [messages])
 
+  const send = async (text) => {
+    await sendMessage(text, term, schedule, constraints, major, completedCourses, remainingMajorRequirements, remainingGERequirements, degreeAuditLoaded, majorSlotsTotal)
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     const trimmed = message.trim()
-    if (!trimmed) return
+    if (!trimmed || isSending) return
     setMessage('')
-    await sendMessage(
-      trimmed,
-      term,
-      schedule,
-      constraints,
-      major,
-      completedCourses,
-      remainingMajorRequirements,
-      remainingGERequirements,
-      degreeAuditLoaded,
-      majorSlotsTotal,
-    )
+    await send(trimmed)
+  }
+
+  const handleGenerateSchedule = () => {
+    if (isSending) return
+    send('Build me a complete schedule for this term. Choose courses that fulfill my remaining requirements, avoid time conflicts, and keep my workload reasonable.')
+  }
+
+  const handlePromptClick = (prompt) => {
+    if (isSending) return
+    send(prompt)
   }
 
   const lastAssistantIndex = messages.map((m) => m.role).lastIndexOf('assistant')
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-2 flex justify-end">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={handleGenerateSchedule}
+          disabled={isSending}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-byu-royal px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-byu-blue disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Wand2 className={`size-3 ${isSending ? 'animate-spin' : ''}`} />
+          {isSending ? 'Generating…' : 'Generate schedule'}
+        </button>
         <button
           type="button"
           onClick={clearMessages}
@@ -62,6 +81,24 @@ export function AIChatPanel({
         </button>
       </div>
       <div ref={scrollRef} className="scrollbar-thin flex-1 space-y-3 overflow-y-auto pr-1">
+        {messages.filter(m => m.role === 'user').length === 0 && (
+          <div className="flex flex-col gap-2 pt-2">
+            <p className="text-center text-xs text-muted-foreground/60">Try asking…</p>
+            <div className="flex flex-wrap gap-1.5">
+              {EXAMPLE_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => handlePromptClick(prompt)}
+                  disabled={isSending}
+                  className="rounded-full border border-border bg-secondary/60 px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-byu-blue/50 hover:bg-secondary hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {messages.map((chatMessage, index) => (
           <div
             key={`${chatMessage.role}-${index}`}
