@@ -10,15 +10,118 @@ function optionCredits(opt: ReqOption, fallback: number): number {
   return typeof opt === 'string' ? fallback : opt.credits ?? fallback
 }
 
-/** Same completion rules as the My Progress tracker — needed for multi-course "pool" major reqs (e.g. complete 23 credits). */
-export function getRequirementProgress(req: RequirementGroup, completedCourseIds: string[]) {
+/** First-winning leaf per scope: each completed course maps to at most one major/minor leaf (document order). GE ignored. */
+export type ExclusiveCourseContext = {
+  primary: Map<string, string>
+  minor: Map<string, string>
+}
+
+function collectExclusiveLeaves(requirements: RequirementGroup[], scope: 'primary' | 'minor'): RequirementGroup[] {
+  const out: RequirementGroup[] = []
+  function walk(nodes: RequirementGroup[]) {
+    for (const r of nodes) {
+      if (r.source !== 'major') continue
+      const s = r.exclusivityScope ?? 'primary'
+      if (s !== scope) continue
+      if (r.children?.length) {
+        walk(r.children)
+      } else if ((r.options?.length ?? 0) > 0) {
+        out.push(r)
+      }
+    }
+  }
+  walk(requirements)
+  return out
+}
+
+export function buildExclusiveOwners(
+  requirements: RequirementGroup[],
+  completedCourseIds: string[],
+  scope: 'primary' | 'minor',
+): Map<string, string> {
   const completedSet = new Set(completedCourseIds.map((c) => normalizeCourseId(c)))
-  const done = (courseId: string) => completedSet.has(normalizeCourseId(courseId))
+  const owners = new Map<string, string>()
+  const leaves = collectExclusiveLeaves(requirements, scope)
+  for (const leaf of leaves) {
+    for (const opt of leaf.options ?? []) {
+      const cid = normalizeCourseId(requirementOptionId(opt))
+      if (!completedSet.has(cid)) continue
+      if (owners.has(cid)) continue
+      owners.set(cid, leaf.id)
+    }
+  }
+  return owners
+}
+
+/** True if this course should show / count for this leaf under exclusive rules (major/minor only). */
+export function completedCourseCountsTowardRequirement(
+  req: RequirementGroup,
+  courseId: string,
+  completedCourseIds: string[],
+  exclusiveContext: ExclusiveCourseContext | null | undefined,
+): boolean {
+  const n = normalizeCourseId(courseId)
+  const completedSet = new Set(completedCourseIds.map((c) => normalizeCourseId(c)))
+  if (!completedSet.has(n)) return false
+  if (req.source === 'ge') return true
+  if (!exclusiveContext || req.children?.length) return true
+  const scope = req.exclusivityScope ?? 'primary'
+  const om = scope === 'minor' ? exclusiveContext.minor : exclusiveContext.primary
+  return om.get(n) === req.id
+}
+
+/** Same completion rules as the My Progress tracker — needed for multi-course "pool" major reqs (e.g. complete 23 credits). */
+export function getRequirementProgress(
+  req: RequirementGroup,
+  completedCourseIds: string[],
+  exclusiveContext?: ExclusiveCourseContext | null,
+) {
+  const completedSet = new Set(completedCourseIds.map((c) => normalizeCourseId(c)))
+  const baseDone = (courseId: string) => completedSet.has(normalizeCourseId(courseId))
+
+  const countsForThisLeaf = (courseId: string): boolean => {
+    if (!baseDone(courseId)) return false
+    if (req.source === 'ge') return true
+    if (!exclusiveContext) return true
+    if (req.children?.length) return true
+    const scope = req.exclusivityScope ?? 'primary'
+    const om = scope === 'minor' ? exclusiveContext.minor : exclusiveContext.primary
+    return om.get(normalizeCourseId(courseId)) === req.id
+  }
+
+  if (req.children?.length) {
+    const childResults = req.children.map((c) => getRequirementProgress(c, completedCourseIds, exclusiveContext))
+    const agg = req.aggregate ?? 'and'
+    if (agg === 'or') {
+      const doneKids = childResults.filter((c) => c.isDone)
+      const isDone = doneKids.length > 0
+      const bestPartial = childResults.length ? Math.max(...childResults.map((c) => c.completedCredits)) : 0
+      const firstDone = doneKids[0]
+      return {
+        isDone,
+        doneBy: firstDone?.doneBy ?? null,
+        completedCredits: isDone ? (firstDone?.completedCredits ?? 0) : bestPartial,
+      }
+    }
+    const isDone = childResults.every((c) => c.isDone)
+    const summed = childResults.reduce((s, c) => s + c.completedCredits, 0)
+    const cap = req.credits || summed
+    const parts = childResults.map((c) => c.doneBy).filter(Boolean) as string[]
+    return {
+      isDone,
+      doneBy: parts.length ? parts.join(' · ') : null,
+      completedCredits: Math.min(cap, summed),
+    }
+  }
 
   const options = req.options as ReqOption[]
 
+  if (options.length === 0) {
+    return { isDone: false, doneBy: null, completedCredits: 0 }
+  }
+
   if (req.source === 'ge' && req.credits <= 3) {
-    const doneOpt = options.find((opt) => done(requirementOptionId(opt)))
+    const doneOpt = options.find((opt) => baseDone(requirementOptionId(opt)))
     return {
       isDone: !!doneOpt,
       doneBy: doneOpt ? requirementOptionId(doneOpt) : null,
@@ -26,7 +129,9 @@ export function getRequirementProgress(req: RequirementGroup, completedCourseIds
     }
   }
 
-  const doneOpts = options.filter((opt) => done(requirementOptionId(opt)))
+  const doneOpts = options.filter((opt) =>
+    req.source === 'ge' ? baseDone(requirementOptionId(opt)) : countsForThisLeaf(requirementOptionId(opt)),
+  )
   const fallbackCr = req.creditPerOption ?? 3
   let sumCr = doneOpts.reduce((sum, opt) => sum + optionCredits(opt, fallbackCr), 0)
   const reqCr = req.credits || 0
@@ -48,7 +153,10 @@ export function getRequirementProgress(req: RequirementGroup, completedCourseIds
 }
 
 export function requirementOptionIds(r: RequirementGroup): string[] {
-  return r.options.map((o) => requirementOptionId(o as ReqOption))
+  if (r.children?.length) {
+    return r.children.flatMap(requirementOptionIds)
+  }
+  return (r.options as ReqOption[]).map(requirementOptionId)
 }
 
 export const DAYS: Weekday[] = ['M', 'T', 'W', 'Th', 'F']

@@ -9,7 +9,13 @@ import { WorkloadMeter } from '@/components/WorkloadMeter'
 import { useCourses } from '@/hooks/useCourses'
 import { GE_REQUIREMENTS } from '@/lib/geRequirements'
 import { parseDegreeAudit } from '@/lib/parseDegreeAudit'
-import { estimateWeeklyLoadHours, getRequirementProgress, normalizeCourseId, requirementOptionIds } from '@/lib/scheduleUtils'
+import {
+  buildExclusiveOwners,
+  estimateWeeklyLoadHours,
+  getRequirementProgress,
+  normalizeCourseId,
+  requirementOptionIds,
+} from '@/lib/scheduleUtils'
 
 const BLOCK_COLORS = ['#0072CE', '#A73A64', '#D14124', '#00966C', '#9E2A2B', '#72246C', '#44693D']
 
@@ -21,13 +27,54 @@ function loadJson(key, fallback) {
   return fallback
 }
 
+function normalizeStoredOption(o) {
+  if (typeof o === 'string') return o
+  if (o && typeof o === 'object' && o.id) return { id: o.id, credits: o.credits }
+  return null
+}
+
+function loadDegreeHoursFromStorage() {
+  return loadJson('byu_degree_hours', null)
+}
+
 function loadMajorRequirementsFromStorage() {
   const raw = loadJson('byu_major_reqs', null)
   if (!raw || !Array.isArray(raw)) return null
-  return raw.map((r) => ({
+  const mapReq = (r) => ({
     ...r,
-    options: (r.options ?? []).map((o) => (typeof o === 'string' ? o : o?.id)).filter(Boolean),
-  }))
+    exclusivityScope: r.exclusivityScope ?? exclusivityScopeFromCategory(r.category),
+    options: (r.options ?? []).map(normalizeStoredOption).filter(Boolean),
+    children: (r.children ?? []).map(mapReq),
+  })
+  return raw.map(mapReq)
+}
+
+function exclusivityScopeFromCategory(category) {
+  if (!category || typeof category !== 'string') return 'primary'
+  if (/\(Minor\)|\bMINOR\s+Requirements?\b/i.test(category)) return 'minor'
+  return 'primary'
+}
+
+function mapParsedAuditBranch(r) {
+  return {
+    id: r.id,
+    label: r.label,
+    category: r.category,
+    credits: r.credits,
+    source: 'major',
+    exclusivityScope: exclusivityScopeFromCategory(r.category),
+    aggregate: r.aggregate,
+    options: (r.options ?? []).map((o) => (typeof o === 'string' ? o : { id: o.id, credits: o.credits })),
+    children: r.children?.map(mapParsedAuditBranch),
+  }
+}
+
+function countMajorLeafSlots(reqs) {
+  if (!reqs?.length) return 0
+  return reqs.reduce((sum, r) => {
+    if (r.children?.length) return sum + countMajorLeafSlots(r.children)
+    return sum + 1
+  }, 0)
 }
 
 export function SchedulerHome() {
@@ -54,6 +101,7 @@ export function SchedulerHome() {
   const [colorPickerOpenId, setColorPickerOpenId] = useState(null)
   const [completedCourses, setCompletedCourses] = useState(() => loadJson('byu_completed', []))
   const [majorRequirements, setMajorRequirements] = useState(() => loadMajorRequirementsFromStorage())
+  const [degreeHoursSummary, setDegreeHoursSummary] = useState(() => loadDegreeHoursFromStorage())
   const [majorName, setMajorName] = useState(() => localStorage.getItem('byu_major_name') ?? '')
   const [rightTab, setRightTab] = useState('ai') // 'ai' | 'tracker'
 
@@ -74,6 +122,10 @@ export function SchedulerHome() {
   }, [constraints, yearterm])
   useEffect(() => { localStorage.setItem('byu_completed', JSON.stringify(completedCourses)) }, [completedCourses])
   useEffect(() => { localStorage.setItem('byu_major_reqs', JSON.stringify(majorRequirements)) }, [majorRequirements])
+  useEffect(() => {
+    if (degreeHoursSummary) localStorage.setItem('byu_degree_hours', JSON.stringify(degreeHoursSummary))
+    else localStorage.removeItem('byu_degree_hours')
+  }, [degreeHoursSummary])
   useEffect(() => { localStorage.setItem('byu_major_name', majorName) }, [majorName])
 
   const courseMap = useMemo(() => {
@@ -87,45 +139,54 @@ export function SchedulerHome() {
 
   const completedSet = useMemo(() => new Set(completedCourses), [completedCourses])
 
-  const allRequirements = useMemo(() => [
-    ...GE_REQUIREMENTS,
-    ...(majorRequirements ?? []),
-  ], [majorRequirements])
+  const allRequirements = useMemo(() => {
+    const audit = majorRequirements ?? []
+    // Degree PDF GE rows are not shown — static `GE_REQUIREMENTS` + completions from the PDF suffice.
+    const majorFromAudit = audit.filter((r) => r.source === 'major')
+    return [...GE_REQUIREMENTS, ...majorFromAudit]
+  }, [majorRequirements])
+
+  /** Within primary or minor, each course counts toward at most one requirement (GE excluded). */
+  const exclusiveCourseContext = useMemo(
+    () => ({
+      primary: buildExclusiveOwners(allRequirements, completedCourses, 'primary'),
+      minor: buildExclusiveOwners(allRequirements, completedCourses, 'minor'),
+    }),
+    [allRequirements, completedCourses],
+  )
 
   const remainingMajorRequirements = useMemo(() => {
     return allRequirements
-      .filter((r) => r.source === 'major' && !getRequirementProgress(r, completedCourses).isDone)
+      .filter((r) => r.source === 'major' && !getRequirementProgress(r, completedCourses, exclusiveCourseContext).isDone)
       .map((r) => {
         const ids = requirementOptionIds(r)
         return ids.length === 1
           ? `${ids[0]} (${r.category}, ${r.credits}cr)`
           : `${r.label} [${ids.join('/')}] (${r.credits}cr)`
       })
-  }, [allRequirements, completedCourses])
+  }, [allRequirements, completedCourses, exclusiveCourseContext])
 
   const remainingGERequirements = useMemo(() => {
     return allRequirements
-      .filter((r) => r.source === 'ge' && !getRequirementProgress(r, completedCourses).isDone)
+      .filter((r) => r.source === 'ge' && !getRequirementProgress(r, completedCourses, exclusiveCourseContext).isDone)
       .map((r) => {
         const ids = requirementOptionIds(r)
         return ids.length === 1
           ? `${ids[0]} (${r.category}, ${r.credits}cr)`
           : `${r.label} GE [${ids.join('/')}] (${r.credits}cr)`
       })
-  }, [allRequirements, completedCourses])
+  }, [allRequirements, completedCourses, exclusiveCourseContext])
 
   const handleDegreeAuditUpload = async (file) => {
     try {
       const result = await parseDegreeAudit(file)
       setMajorName(result.major)
-      setMajorRequirements(result.requirements.map((r, idx) => ({
-        id: r.id || `major-req-${idx}`,
-        label: r.label,
-        category: r.category,
-        credits: r.credits,
-        source: 'major',
-        options: r.options.map((o) => (typeof o === 'string' ? o : o.id)),
-      })))
+      setDegreeHoursSummary(result.hoursSummary ?? null)
+      setMajorRequirements(
+        result.requirements
+          .filter((r) => r.auditSection !== 'ge')
+          .map((r, idx) => mapParsedAuditBranch({ ...r, id: r.id || `major-req-${idx}` })),
+      )
       if (result.completedCourses?.length > 0) {
         setCompletedCourses(prev => [...new Set([...prev, ...result.completedCourses])])
       }
@@ -136,6 +197,7 @@ export function SchedulerHome() {
 
   const handleRemoveDegreeProgress = () => {
     setMajorRequirements(null)
+    setDegreeHoursSummary(null)
     setMajorName('')
     setCompletedCourses([])
   }
@@ -412,11 +474,13 @@ export function SchedulerHome() {
                 remainingMajorRequirements={remainingMajorRequirements}
                 remainingGERequirements={remainingGERequirements}
                 degreeAuditLoaded={majorRequirements !== null}
-                majorSlotsTotal={majorRequirements?.length ?? 0}
+                majorSlotsTotal={majorRequirements ? countMajorLeafSlots(majorRequirements) : 0}
               />
             ) : (
               <MajorTrackerPanel
                 requirements={allRequirements}
+                hoursSummary={degreeHoursSummary}
+                exclusiveCourseContext={exclusiveCourseContext}
                 majorLoaded={majorRequirements !== null}
                 completedCourses={completedCourses}
                 onToggleCompleted={handleToggleCompleted}

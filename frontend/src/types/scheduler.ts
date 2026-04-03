@@ -77,12 +77,21 @@ export interface ScheduleUpdatePayload {
   removeCourseIds?: string[]
 }
 
+/** Course IDs for a requirement leaf; objects preserve per-line credit hours from the audit PDF. */
+export type RequirementOption = string | { id: string; credits?: number }
+
 export interface RequirementGroup {
-  id: string        // stable key, e.g. "ge-arts", "major-CS-235"
-  label: string     // display name, e.g. "Arts", "Data Structures"
-  category: string  // section header for accordion grouping
+  id: string // stable key, e.g. "ge-arts", "major-CS-235"
+  label: string // display name, e.g. "Arts", "Data Structures"
+  category: string // section header for accordion grouping
   credits: number
-  creditPerOption?: number  // default credits per option when stored as plain strings
-  options: string[] // course IDs that satisfy this slot (single-element for major reqs)
+  creditPerOption?: number // default credits per option when stored as plain strings
+  options: RequirementOption[] // leaf: course ids; containers usually []
   source: 'ge' | 'major'
+  /** Primary degree vs minor; GE rows omit. A course counts toward at most one leaf per scope (not across GE). */
+  exclusivityScope?: 'primary' | 'minor'
+  /** Nested MAP rows (Requirement → Options → Requirements → courses). */
+  children?: RequirementGroup[]
+  /** Container only: Option children = pick one track (OR); Requirement children under an Option = all must be met (AND). */
+  aggregate?: 'or' | 'and'
 }
