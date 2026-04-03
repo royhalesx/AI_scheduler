@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, ChevronDown, GraduationCap, MessageCircleQuestion, Sparkles, ShieldCheck, X } from 'lucide-react'
+import { AlertTriangle, BarChart2, CalendarDays, ChevronDown, GraduationCap, MessageCircleQuestion, Sparkles, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { AIChatPanel } from '@/components/AIChatPanel'
 import { CourseSearch } from '@/components/CourseSearch'
@@ -513,6 +513,14 @@ export function SchedulerHome() {
                   )
                 })}
               </ul>
+              <button
+                type="button"
+                onClick={() => { setRightTab('ai'); setAiTrigger({ text: 'Analyze my current schedule. Comment on the workload level, course difficulty mix, time spread across the week, and anything I should know about these specific professors or courses.', id: Date.now() }) }}
+                className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-secondary/80"
+              >
+                <BarChart2 className="size-3.5" />
+                Analyze my schedule
+              </button>
             </section>
           )}
 
@@ -568,7 +576,7 @@ export function SchedulerHome() {
           </div>
 
           <div className="min-h-0 flex-1 overflow-hidden p-3">
-            {rightTab === 'ai' ? (
+            <div className={rightTab === 'ai' ? 'flex h-full flex-col' : 'hidden'}>
               <AIChatPanel
                 term={yearterm}
                 schedule={schedule}
@@ -582,8 +590,10 @@ export function SchedulerHome() {
                 degreeAuditLoaded={majorRequirements !== null}
                 majorSlotsTotal={majorRequirements ? countMajorLeafSlots(majorRequirements) : 0}
                 triggerMessage={aiTrigger}
+                onTriggerHandled={() => setAiTrigger(null)}
               />
-            ) : (
+            </div>
+            <div className={rightTab === 'tracker' ? 'flex h-full flex-col' : 'hidden'}>
               <MajorTrackerPanel
                 requirements={allRequirements}
                 hoursSummary={degreeHoursSummary}
@@ -606,7 +616,7 @@ export function SchedulerHome() {
                 onUploadAudit={handleDegreeAuditUpload}
                 onRemoveProgress={handleRemoveDegreeProgress}
               />
-            )}
+            </div>
           </div>
         </div>
 

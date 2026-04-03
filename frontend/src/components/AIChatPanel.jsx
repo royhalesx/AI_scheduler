@@ -1,4 +1,4 @@
-import { BarChart2, MessageCircleQuestion, SendHorizonal, Trash2, Undo2, Wand2 } from 'lucide-react'
+import { MessageCircleQuestion, SendHorizonal, Trash2, Undo2, Wand2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@/hooks/useChat'
@@ -23,6 +23,7 @@ export function AIChatPanel({
   degreeAuditLoaded = false,
   majorSlotsTotal = 0,
   triggerMessage = null,
+  onTriggerHandled = null,
 }) {
   const [message, setMessage] = useState('')
   const { messages, sendMessage, isSending, error, clearMessages } = useChat(onScheduleUpdate)
@@ -34,10 +35,11 @@ export function AIChatPanel({
     }
   }, [messages])
 
-  // Auto-send when parent triggers a course-explain message
+  // Auto-send when parent triggers a message, then clear so remounting doesn't re-fire
   useEffect(() => {
     if (triggerMessage?.text && !isSending) {
       send(triggerMessage.text)
+      onTriggerHandled?.()
     }
   }, [triggerMessage?.id])
 
@@ -67,36 +69,24 @@ export function AIChatPanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-2 flex flex-col gap-1.5">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleGenerateSchedule}
-            disabled={isSending}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-byu-royal px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-byu-blue disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Wand2 className={`size-3 ${isSending ? 'animate-spin' : ''}`} />
-            {isSending ? 'Generating…' : 'Generate schedule'}
-          </button>
-          <button
-            type="button"
-            onClick={clearMessages}
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-rose-400"
-            aria-label="Clear chat"
-            title="Clear chat"
-          >
-            <Trash2 className="size-3" />
-          </button>
-        </div>
+      <div className="flex items-center gap-2 pb-2 border-b border-border">
         <button
           type="button"
-          onClick={() => send('Analyze my current schedule. Comment on the workload level, course difficulty mix, time spread across the week, and anything I should know about these specific professors or courses.')}
-          disabled={isSending || schedule.length === 0}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-60"
-          title="Analyze current schedule"
+          onClick={handleGenerateSchedule}
+          disabled={isSending}
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-byu-royal px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-byu-blue disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <BarChart2 className="size-3" />
-          Analyze my schedule
+          <Wand2 className={`size-3 ${isSending ? 'animate-spin' : ''}`} />
+          {isSending ? 'Generating…' : 'Generate schedule'}
+        </button>
+        <button
+          type="button"
+          onClick={clearMessages}
+          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted-foreground/50 transition-colors hover:bg-secondary hover:text-rose-400"
+          aria-label="Clear chat"
+          title="Clear chat"
+        >
+          <Trash2 className="size-3" />
         </button>
       </div>
       <div ref={scrollRef} className="scrollbar-thin flex-1 space-y-3 overflow-y-auto pr-1">
