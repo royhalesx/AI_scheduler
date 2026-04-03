@@ -1,12 +1,25 @@
+const FORECAST = [
+  { max: 25, label: 'Light',       color: 'text-emerald-400' },
+  { max: 38, label: 'Balanced',    color: 'text-byu-light'   },
+  { max: 50, label: 'Challenging', color: 'text-amber-400'   },
+  { max: Infinity, label: 'Heavy', color: 'text-rose-400'    },
+]
+
 export function WorkloadMeter({ credits, workloadHours }) {
-  const intensity = Math.min(100, Math.round((workloadHours / 55) * 100))
+  const intensity = Math.min(100, Math.round((workloadHours / 65) * 100))
+  const forecast = FORECAST.find(f => workloadHours < f.max) ?? FORECAST[FORECAST.length - 1]
 
   return (
     <div className="rounded-2xl border border-border bg-card/70 p-4 backdrop-blur-sm">
       <div className="mb-2 flex items-end justify-between">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">Estimated Weekly Load</p>
-          <p className="text-2xl font-semibold text-foreground">{workloadHours} hrs</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-semibold text-foreground">{workloadHours} hrs</p>
+            {workloadHours > 0 && (
+              <span className={`font-mono text-sm font-semibold ${forecast.color}`}>{forecast.label}</span>
+            )}
+          </div>
         </div>
         <div className="text-right">
           <p className="text-sm text-muted-foreground">Total credits</p>

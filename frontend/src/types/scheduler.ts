@@ -75,6 +75,7 @@ export interface ScheduleUpdatePayload {
     sectionId?: string
   }>
   removeCourseIds?: string[]
+  clearSchedule?: boolean
 }
 
 /** Course IDs for a requirement leaf; objects preserve per-line credit hours from the audit PDF. */

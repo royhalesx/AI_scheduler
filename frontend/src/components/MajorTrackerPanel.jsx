@@ -39,6 +39,13 @@ function sortOptionsByCompletion(opts, getOptionId, req, completedCourses, exclu
   })
 }
 
+/** Reorder "3 Hrs Requirement 6.1.1" → "Requirement 6.1.1 — 3 hrs" */
+function formatRequirementLabel(label) {
+  const m = (label ?? '').match(/^(\d+\.?\d*)\s+Hrs\s+(.*)/i)
+  if (m) return `${m[2]} — ${m[1]} hrs`
+  return label ?? ''
+}
+
 /** Major leaf: MAP line should read as the title, course id as supporting text. */
 function preferRequirementLabelFirst(req) {
   if (req.source !== 'major' || (req.options?.length ?? 0) !== 1) return false
@@ -82,7 +89,7 @@ function RequirementTreeItem({
           </span>
           <div className="min-w-0">
             <p className={`text-xs font-semibold leading-snug ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-              {req.label}
+              {formatRequirementLabel(req.label)}
             </p>
             <button
               type="button"
@@ -135,7 +142,7 @@ function RequirementTreeItem({
         <div className={`${ROW_GRID} ${ROW_PAD} py-2 text-xs text-muted-foreground`}>
           <span className="w-full max-w-[1.5rem] shrink-0" aria-hidden />
           <div className="min-w-0 col-span-2">
-            {req.label}
+            {formatRequirementLabel(req.label)}
             <span className="ml-2">(no courses parsed)</span>
           </div>
         </div>
@@ -178,7 +185,7 @@ function RequirementTreeItem({
           {isGrouped ? (
             <>
               <p className={`text-xs font-semibold ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                {req.label}
+                {formatRequirementLabel(req.label)}
               </p>
               <button
                 type="button"
@@ -196,7 +203,7 @@ function RequirementTreeItem({
           ) : preferRequirementLabelFirst(req) ? (
             <>
               <p className={`text-xs font-semibold leading-snug ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                {req.label}
+                {formatRequirementLabel(req.label)}
               </p>
               <p className={`mt-0.5 font-mono text-xs ${isDone ? 'text-muted-foreground line-through' : 'text-muted-foreground'}`}>
                 {getOptionId(opts[0])}
@@ -208,7 +215,7 @@ function RequirementTreeItem({
                 {getOptionId(opts[0])}
               </p>
               {req.label && req.label !== getOptionId(opts[0]) && (
-                <p className="truncate text-xs text-muted-foreground">{req.label}</p>
+                <p className="truncate text-xs text-muted-foreground">{formatRequirementLabel(req.label)}</p>
               )}
             </>
           )}
@@ -255,11 +262,6 @@ function RequirementTreeItem({
                 </button>
                 <span className={`text-xs font-mono flex-1 ${optDone ? 'text-muted-foreground line-through' : inList ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>
                   {opt}
-                  {inList && !optDone && req.source === 'major' && (
-                    <span className="ml-1.5 text-[10px] text-amber-600/90" title="Completed but counts toward another requirement in this program">
-                      (used elsewhere)
-                    </span>
-                  )}
                 </span>
                 {!optDone && onAddCourse && (
                   <button

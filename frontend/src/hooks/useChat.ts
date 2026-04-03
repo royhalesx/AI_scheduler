@@ -51,7 +51,13 @@ function parseScheduleUpdateFromResponse(content: string): ScheduleUpdatePayload
 
     // Handle {action, courses} format from the AI prompt
     if (parsed.action && parsed.courses) {
-      if (parsed.action === 'add' || parsed.action === 'swap' || parsed.action === 'suggest_schedule') {
+      if (parsed.action === 'suggest_schedule') {
+        return {
+          clearSchedule: true,
+          addSections: parsed.courses.map((c) => ({ courseId: c.courseId, sectionId: c.sectionId })),
+        }
+      }
+      if (parsed.action === 'add' || parsed.action === 'swap') {
         return {
           addSections: parsed.courses.map((c) => ({ courseId: c.courseId, sectionId: c.sectionId })),
         }

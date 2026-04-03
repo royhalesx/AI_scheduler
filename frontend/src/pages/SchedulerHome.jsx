@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, GraduationCap, Sparkles, ShieldCheck, X } from 'lucide-react'
+import { AlertTriangle, CalendarDays, ChevronDown, GraduationCap, MessageCircleQuestion, Sparkles, ShieldCheck, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { AIChatPanel } from '@/components/AIChatPanel'
 import { CourseSearch } from '@/components/CourseSearch'
@@ -104,6 +104,15 @@ export function SchedulerHome() {
   const [degreeHoursSummary, setDegreeHoursSummary] = useState(() => loadDegreeHoursFromStorage())
   const [majorName, setMajorName] = useState(() => localStorage.getItem('byu_major_name') ?? '')
   const [rightTab, setRightTab] = useState('ai') // 'ai' | 'tracker'
+  const [aiTrigger, setAiTrigger] = useState(null) // { text, id }
+
+  const handleAskAboutCourse = (courseId, courseTitle) => {
+    setRightTab('ai')
+    setAiTrigger({
+      text: `Why is ${courseId} (${courseTitle}) a good choice for my schedule? What requirement does it fill, how does it fit my situation, and is there anything I should know about it?`,
+      id: Date.now(),
+    })
+  }
 
   // When term changes, load that term's saved schedule and constraints
   useEffect(() => {
@@ -250,7 +259,7 @@ export function SchedulerHome() {
   const handleScheduleUpdate = (payload) => {
     setSchedule((current) => {
       setPreAiSchedule(current)
-      let next = [...current]
+      let next = payload.clearSchedule ? [] : [...current]
       if (payload.removeCourseIds?.length) {
         next = next.filter((entry) => !payload.removeCourseIds.includes(entry.courseId))
       }
@@ -346,6 +355,9 @@ export function SchedulerHome() {
                 {schedule.map((item) => {
                   const course = courseMap.get(item.courseId)
                   const isExpanded = expandedCourseId === item.courseId
+                  const unmetPrereqs = (course?.prerequisites ?? []).filter(
+                    p => !completedSet.has(normalizeCourseId(p))
+                  )
 
                   return (
                     <li key={item.courseId}>
@@ -365,11 +377,29 @@ export function SchedulerHome() {
                             style={{ backgroundColor: item.color }}
                           />
                           <div className="min-w-0">
-                            <p className="font-mono text-xs font-semibold text-foreground truncate">{item.courseId}</p>
+                            <div className="flex items-center gap-1">
+                              <p className="font-mono text-xs font-semibold text-foreground truncate">{item.courseId}</p>
+                              {unmetPrereqs.length > 0 && (
+                                <span title={`Missing prereqs: ${unmetPrereqs.join(', ')}`}>
+                                  <AlertTriangle className="size-3 shrink-0 text-amber-400" />
+                                </span>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground truncate">{item.title}</p>
                           </div>
                         </div>
                         <div className="flex shrink-0 items-center gap-1">
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            title={`Ask AI about ${item.courseId}`}
+                            onClick={(e) => { e.stopPropagation(); handleAskAboutCourse(item.courseId, item.title) }}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handleAskAboutCourse(item.courseId, item.title) } }}
+                            className="rounded p-0.5 text-muted-foreground/40 hover:text-byu-light transition-colors"
+                            aria-label={`Ask AI about ${item.courseId}`}
+                          >
+                            <MessageCircleQuestion className="size-3.5" />
+                          </span>
                           <ChevronDown className={`size-3.5 text-muted-foreground/60 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                           <span
                             role="button"
@@ -478,6 +508,7 @@ export function SchedulerHome() {
                 remainingGERequirements={remainingGERequirements}
                 degreeAuditLoaded={majorRequirements !== null}
                 majorSlotsTotal={majorRequirements ? countMajorLeafSlots(majorRequirements) : 0}
+                triggerMessage={aiTrigger}
               />
             ) : (
               <MajorTrackerPanel

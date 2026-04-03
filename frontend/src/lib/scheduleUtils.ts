@@ -312,7 +312,7 @@ export function estimateWeeklyLoadHours(schedule: ScheduledCourse[]): number {
       ? 0.8 + ((Math.min(5, Math.max(1, difficulty)) - 1) / 4) * 0.8
       : 1.0
 
-    const studyHours = contactHours * 2.0 * diffFactor * levelFactor
+    const studyHours = contactHours * 1.5 * diffFactor * levelFactor
 
     return sum + contactHours + studyHours
   }, 0)

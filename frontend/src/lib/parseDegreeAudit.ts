@@ -155,6 +155,15 @@ function pruneEmpty(n: ParsedRequirement): ParsedRequirement | null {
 // Excludes W (withdrawal), I (incomplete), NP, IP which mean NOT done.
 const COMPLETED_GRADE_RE = /\b(A[+-]?|B[+-]?|C[+-]?|D[+-]?|P|CR|WVR)\b/
 
+// A semester enrollment date without a grade also counts as completed,
+// but ONLY when the line contains exactly the pattern "(Winter|Fall|Spring|Summer) Semester 20XX"
+// with no "Planned" qualifier (Planned = not yet taken).
+const SEMESTER_TAKEN_RE = /\b(Winter|Fall|Spring|Summer)\s+Semester\s+20\d{2}\b/i
+
+function isSemesterCompleted(line: string): boolean {
+  return SEMESTER_TAKEN_RE.test(line) && !/\bPlanned\b/i.test(line)
+}
+
 // BYU 3-digit course ID pattern.
 // Handles: "CS 235", "EC EN 224", "REL A 275", "MATH 112", "IT&C 567", "PHSCS 121"
 // Also handles PDF quirk where "CS" is written "C S" (space between single letters).
@@ -667,7 +676,7 @@ export function parseDegreeAuditFromLines(rawLines: string[]): ParsedDegreeAudit
         ? parseFloat(creditsAfterMatch[1])
         : 3
 
-    if (fromSatisfiedBy || COMPLETED_GRADE_RE.test(afterId) || /In Progress/i.test(afterId)) {
+    if (fromSatisfiedBy || COMPLETED_GRADE_RE.test(afterId) || /In Progress/i.test(afterId) || isSemesterCompleted(courseScanLine)) {
       completedCourses.add(courseId)
     }
 

@@ -161,6 +161,7 @@ func corsMiddleware() gin.HandlerFunc {
 		allowedOrigins := []string{
 			"http://localhost:5173",
 			"http://localhost:3000",
+			"chrome-extension://Igncffmdpddbjmnfblfdoigoglcbgila",
 		}
 		for _, o := range allowedOrigins {
 			if origin == o {

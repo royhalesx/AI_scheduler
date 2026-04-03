@@ -329,7 +329,20 @@ func (s *appState) chat(c *gin.Context) {
 
 	// 3. Build the user message with RAG context
 	scheduleJSON, _ := json.MarshalIndent(req.CurrentSchedule, "", "  ")
-	constraintsJSON, _ := json.MarshalIndent(req.Constraints, "", "  ")
+
+	// Format blocked times in 12-hour format to match course times in the RAG context —
+	// eliminates the model needing to convert between formats, which it often gets wrong.
+	var blockedTimesStr string
+	if len(req.Constraints.BlockedTimes) == 0 {
+		blockedTimesStr = "None"
+	} else {
+		var lines []string
+		for _, bt := range req.Constraints.BlockedTimes {
+			days := strings.Join(bt.Days, " ")
+			lines = append(lines, fmt.Sprintf("  • %s %s – %s", days, to12h(bt.StartTime), to12h(bt.EndTime)))
+		}
+		blockedTimesStr = strings.Join(lines, "\n")
+	}
 
 	major := req.Major
 	if major == "" {
@@ -394,14 +407,14 @@ func (s *appState) chat(c *gin.Context) {
 
 Major (declared): %s
 %s
-Completed courses: %s
+Completed courses (DO NOT recommend any of these — student already took them): %s
 
 %s
 
 Current schedule:
 %s
 
-Constraints (blocked times use 24-hour format, e.g. "14:00" = 2:00 PM):
+BLOCKED TIMES — student cannot attend during these slots. Do NOT suggest any course whose section meets on a listed day within this time range:
 %s
 
 Term: %s
@@ -416,7 +429,7 @@ Use ONLY the course data in the RETRIEVED COURSE CONTEXT below for specific fact
 		completedStr,
 		progressBlock,
 		string(scheduleJSON),
-		string(constraintsJSON),
+		blockedTimesStr,
 		termData.Term,
 		focusLine,
 		ragContext,
