@@ -2,38 +2,13 @@ let byuConnection = false;
 const startApply = 0;
 const continueApply = 1;
 
-// TODO: Change when deployed (e.g., "your-app-name.herokuapp.com") and update manifest
 const websiteURL = "byu-scheduler.vercel";
 
-
-// TODO: Data state change to null when deployed
-// TODO: store this data in chrome.storage.local
-let classes = [
-          { 
-            catalog_number: "CS 111", 
-            instructor: "Giles", 
-            days: "MW", 
-            start: "8a",
-            end: "9:15a"
-          },
-          { 
-            catalog_number: "CS 235", 
-            instructor: "Crandall", 
-            days: "MW", 
-            start: "2p",
-            end: "3:15p"
-          },
-          { 
-            catalog_number: "MATH 112", 
-            instructor: "Dorff", 
-            days: "MWF", 
-            start: "9a",
-            end: "9:50a"
-          }
-        ];
+let classes ;
 let term = "Fall"; //fetch this too I guess
+let hasSavedSchedule = false;
 
-function init() {
+async function init() {
   // Trigger popup if on CommTech site
   if (window.location.href.includes("commtech")) {
     // TODO: enable when deployed?
@@ -42,130 +17,113 @@ function init() {
   } else {
     byuConnection = false;
   }
-
-
-
+  await checkForSchedule();
 }
 
 // CHECK FOR SCHEDULE WHEN VISITING A WEBSITE AND YOU HAVE A SCHEDULE
 
-function checkForSchedule() {
-  // Logic to determine if a schedule is available for import
-  // For now, we'll assume there is one found in local storage or session
+async function checkForSchedule() {
+  const result = await chrome.storage.local.get(["savedClasses", "savedIndex", "term"]);
+  
+  // Update globals
+  classes = result.savedClasses;
+  term = result.term || "Fall"; // Use saved term or default to Fall
+  const savedIndex = result.savedIndex;
 
-  if (classes) {
-    showImportPopup();
+  if (classes && classes.length > 0 && savedIndex < classes.length) {
+    hasSavedSchedule = true;
+  } else {
+    hasSavedSchedule = false;
   }
 }
-
-// ASK TO IMPORT THE SCHEDULE
-
-function showImportPopup() {
-  if (document.getElementById("byu-scheduler-overlay")) return;
-
-  const overlay = document.createElement("div");
-  overlay.id = "byu-scheduler-overlay";
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 46, 93, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    backdrop-filter: blur(4px);
-  `;
-
-  const box = document.createElement("div");
-  box.style.cssText = `
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    font-family: 'Segoe UI', sans-serif;
-    max-width: 350px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  `;
-
-  box.innerHTML = `
-    <h2 style="margin: 0 0 10px 0; color: #002E5D;">Import Schedule?</h2>
-    <p style="color: #555; font-size: 14px; line-height: 1.5;">We found an AI-generated schedule ready to go. Would you like to apply it to your current cart?</p>
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-      <button id="import-btn" style="flex: 2; padding: 10px; background: #002E5D; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Yes, Import</button>
-      <button id="close-btn" style="flex: 1; padding: 10px; background: #eee; color: #333; border: none; border-radius: 6px; cursor: pointer;">Later</button>
-    </div>
-  `;
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  // Event Listeners
-  document.getElementById("import-btn").addEventListener("click", () => {
-    handleScheduleImport(startApply);
-    overlay.remove();
-  });
-
-  document.getElementById("close-btn").addEventListener("click", () => {
-    overlay.remove();
-  });
-
-
-}
-
 
 //DOWNLOAD THE SCHEDULE
 
 
+
 async function handleScheduleDownload() {
- const statusEl = document.getElementById('status');
-  statusEl.textContent = 'Grabbing local schedule...';
+  console.log("🚀 Starting Sync...");
 
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  // 1. SCRAPE THE TERM FIRST
+  let selectedTerm = "Fall"; // Default fallback
+
+  // Use dots to indicate these are classes, and 'p' to specify the tag
+  const termSelector = "p.font-mono.text-sm.font-medium.text-foreground";
+  const termElement = document.querySelector(termSelector);
+
+  if (termElement) {
+    const text = termElement.innerText; // e.g., "Fall 2026"
     
-    // Ensure we are on the AI site
-    if (!tab.url.includes("byu-scheduler")) {
-      statusEl.textContent = 'Switch to the AI Scheduler tab!';
-      return;
-    }
+    if (text.includes("Fall")) selectedTerm = "Fall";
+    else if (text.includes("Spring")) selectedTerm = "Spring";
+    else if (text.includes("Winter")) selectedTerm = "Winter";
+    else if (text.includes("Summer")) selectedTerm = "Summer";
 
-    // 1. Scrape the localStorage directly
-    const [{ result }] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => {
-        const rawSchedule = JSON.parse(localStorage.getItem('byu_active_schedule') ?? '[]');
-        return rawSchedule.map(item => ({
-          // Map their keys to EXACTLY what your content.js expects:
-          catalog_number: item.catalog_number || item.courseId, 
-          instructor: item.instructor,
-          days: item.days,
-          start: item.start,
-          end: item.end
-        }));
-      },
-    });
-    console.log(result)
-
-    if (!result || result.length === 0) {
-      statusEl.textContent = 'No classes found in browser storage.';
-      return;
-    }
-
-    // 2. Save directly to Extension Storage
-    await chrome.storage.local.set({ 
-      "savedClasses": result, 
-      "savedIndex": 0 
-    });
-
-    statusEl.textContent = `✅ ${result.length} Classes Loaded Locally!`;
-    console.log("Direct Sync Successful:", result);
-
-  } catch (err) {
-    console.error("Local sync failed:", err);
-    statusEl.textContent = 'Sync Error: ' + err.message;
+    console.log(`📍 Term found in HTML: ${selectedTerm}`);
+  } else {
+    console.warn("Could not find the term <p> element with that specific class.");
   }
+
+  // 2. SCRAPE THE CLASSES (using your column-based logic)
+  const dayMap = ["M", "T", "W", "Th", "F"];
+  const rawClasses = [];
+  const columns = document.querySelectorAll('.relative.border-l.border-border');
+
+  columns.forEach((column, index) => {
+    if (index > 4) return;
+    const day = dayMap[index];
+    const boxSelector = ".pointer-events-auto.absolute.left-1.right-1.cursor-pointer.overflow-hidden.rounded-md.border.p-1.shadow-md.transition-colors.duration-200.border-black\\/20.text-white";
+    const boxes = column.querySelectorAll(boxSelector);
+
+    boxes.forEach((box) => {
+      const paragraphs = box.querySelectorAll('p');
+      if (paragraphs.length < 4) return;
+
+      const rawCode = paragraphs[0].innerText.split('\n')[0].replace(/"/g, '');
+      const catalog_number = rawCode.split('§')[0].trim();
+      const instructor = paragraphs[3].innerText.replace(/"/g, '').replace(/\(.*\)/, '').trim();
+      const timeText = paragraphs[2].innerText.replace(/"/g, '');
+      const timeParts = timeText.split(/[–-]/).map(t => t.trim());
+
+      const formatTime = (t) => {
+        if (!t) return "";
+        return t.toLowerCase().replace(/\s/g, '').replace(':00', '').replace('am', 'a').replace('pm', 'p').replace('m', '');
+      };
+
+      rawClasses.push({ 
+        catalog_number, 
+        instructor, 
+        days: day, 
+        start: formatTime(timeParts[0]), 
+        end: formatTime(timeParts[1]) 
+      });
+    });
+  });
+
+  // 3. MERGE & SORT (standard logic)
+  const merged = Object.values(rawClasses.reduce((acc, curr) => {
+    const key = `${curr.catalog_number}-${curr.instructor}-${curr.start}`;
+    if (!acc[key]) acc[key] = { ...curr };
+    else if (!acc[key].days.includes(curr.days)) acc[key].days += curr.days;
+    return acc;
+  }, {}));
+
+  const finalSchedule = merged.map(item => ({
+    ...item,
+    days: dayMap.filter(d => item.days.includes(d)).join('')
+  }));
+
+  // 4. SAVE EVERYTHING
+  await chrome.storage.local.set({ 
+    "savedClasses": finalSchedule, 
+    "savedIndex": 0,
+    "term": selectedTerm 
+  });
+
+  hasSavedSchedule = true;
+  console.log(`✅ Sync Complete: ${finalSchedule.length} classes for ${selectedTerm}.`);
 }
+
 //  IMPORT THE SCHEDULE
 
 
@@ -186,9 +144,36 @@ const waitForSelector = (selector, timeout = 5000) => {
   });
 };
 
+async function hitBack() {
+  try {
+    // Wait for the button container to actually exist
+    await waitForSelector('.customButtonText'); 
+    
+    const buttons = document.querySelectorAll('.customButtonText');
+    const backBtn = Array.from(buttons).find(el => el.innerText.includes("Back"));
 
+    if (backBtn) {
+      console.log("Back button found. Navigating back...");
+      
+      // Focus and Click
+      backBtn.focus();
+      backBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      backBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      backBtn.click();
+      
+      // Crucial: Wait for the navigation/transition to actually start
+      await new Promise(resolve => setTimeout(resolve, 800)); 
+    }
+  } catch (err) {
+    console.error("Back button navigation failed:", err);
+  }
+}
 
 async function handleScheduleImport(indexMode) {
+  if(!hasSavedSchedule) {
+    await hitBack(); // MUST await here
+    return;
+  }
  
   //STEP 1: ensure the user is on the correct page if they are not on add a course redirect them
   const currentUrl = window.location.href;
@@ -216,17 +201,21 @@ async function handleScheduleImport(indexMode) {
 
   //STEP 2: Get data from local storage
 
-  // const result = await chrome.storage.local.get("savedClasses");
-  //classes = result;
-  const indexResult = await chrome.storage.local.get("savedIndex");
-  const classIndex = indexResult.savedIndex;
-  console.log("Index of :" + classIndex)
+  const result = await chrome.storage.local.get(["savedClasses", "savedIndex", "term"]);
+  term = result.term
+  const classIndex = result.savedIndex
+  classes=result.savedClasses
+
 
   // const classes = result.savedClasses;
 
   //if I can't find classes then there is no need to do anything.
-  if (!classes || classes.length === 0 || classIndex >= classes.length) return;
-
+  if (!classes || classes.length === 0 || classIndex >= classes.length) {
+    console.log("🎉 All classes processed! Navigating back to home...");
+    hasSavedSchedule = false;
+    await hitBack(); // MUST await here
+    return;
+}
 
   //STEP 3: Change term to term fetched from the schedule builder
 
@@ -427,34 +416,13 @@ try {
 
 
   //STEP 7: redirect back to schedulebuilder page and loop through the next class
-  await new Promise(resolve => setTimeout(resolve, 1000)); //TODO: Replace 
+  // STEP 7: Wait for Add button action to clear and click Back
+  await new Promise(resolve => setTimeout(resolve, 1000)); 
 
+  await hitBack(); // Wait for the transition to the search page
 
-  try {
-    // 1. Find the specific dropdown trigger that contains a term name
-    const back = document.querySelectorAll('.customButtonText');
-    let backBtn;
-    back.forEach(element => {
-      if(element.innerText.includes("Back")){
-        backBtn = element;
-      }
-    });
- if (backBtn) {
-        console.log("backBtn found inside section. Clicking...");
-        
-        // 2. Perform the established click technique
-        backBtn.focus();
-        backBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-        backBtn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-        backBtn.click();
-        
-        console.log("✅ Course successfully added to cart!");
-    }
-  } catch (err) {
-    console.error("Term/Year selection failed:", err);
-  }
-
-  handleScheduleImport(continueApply);
+  // Wait for the search box to reappear before the next class starts
+    handleScheduleImport(continueApply);
 }
 
 
@@ -470,7 +438,6 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 
 // Listen for messages from the popup requesting the current status
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  let hasSavedSchedule = (classes ? true : false)
   if (request.action === "getStatus") {
     sendResponse({ byuConnection, hasSavedSchedule });
   }
@@ -483,3 +450,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 
+// Listen for changes in storage from OTHER tabs
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace === 'local' && (changes.savedClasses || changes.savedIndex)) {
+    checkForSchedule(); 
+  }
+});

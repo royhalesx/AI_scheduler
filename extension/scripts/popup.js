@@ -13,10 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("download-button").addEventListener("click", () => {
         console.log("Popup: Download requested");
         // Logic to download from your AI server
-        // handleLocalSync();
          chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
             chrome.tabs.sendMessage(tabs[0].id, {action: "downloadSchedule"});
         });
+          updateStatus('hasSavedSchedule', true);
     });
 
     // popup.js
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function updateStatus(id, active) {
+async function updateStatus(id, active) {
     const el = document.getElementById(id);
     if (el) {
         el.className = active ? "dot green" : "dot red";
