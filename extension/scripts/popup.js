@@ -87,4 +87,11 @@ async function updateStatus(id, active) {
     if (el) {
         el.className = active ? "dot green" : "dot red";
     }
+    if(active && id == 'byuConnection'){
+      document.getElementById('download-button').className="no-btn"
+      document.getElementById('apply-button').className="secondary-btn"
+    } else if(id == 'byuConnection'){
+       document.getElementById('download-button').className="secondary-btn"
+      document.getElementById('apply-button').className="no-btn"
+    }
 }
